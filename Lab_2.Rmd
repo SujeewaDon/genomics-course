@@ -1,5 +1,5 @@
 ---
-title: "Lab_1"
+title: "Lab_2.Rmd"
 output: html_document
 ---
 

@@ -6,3 +6,4 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+  [Lab-1](Lab-1 exercise)

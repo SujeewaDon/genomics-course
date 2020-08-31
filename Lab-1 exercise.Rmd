@@ -1,0 +1,38 @@
+---
+title: "Lab-1-1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Exercise 1
+```{r}
+x<- 3
+y<-15
+x+y
+y-x
+x*y
+y/x
+```
+#Exercise 2
+#For x = 2 and y = 3, Test x^5 is greater than y^4 and return a logical value
+```{r}
+x<-2
+y<-3
+x^5>y^4
+```
+#Exercise 3
+#Create a vector of the values 22, 62, 148, 43 and 129. Determine the sum of the vector. Divide each value in the vector by the sum to determine relate frequency.
+```{r}
+num <- c(22, 62, 148, 43, 129)
+sum(num)
+num/sum(num)
+```
+#Exercise 4
+#Create a vector of the nucleotides A, T, C and G. Sort the vector
+```{r}
+nucleotides <- c("A", "T", "C","G")
+sort(nucleotides)
+```

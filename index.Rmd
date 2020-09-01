@@ -1,6 +1,9 @@
 ---
-title: "index"
+title: "Evolutionary Genomics & Bioinformatics"
+author: "Jeffrey Blanchard"
+date: "2/26/2020"
 output: html_document
+bibliography: data/references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -8,3 +11,5 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
   [Lab-1](Lab_1.html)
   [Lab-2](Lab_2.html)
+  
+# REFERENCES

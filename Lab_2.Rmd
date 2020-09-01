@@ -1,6 +1,7 @@
 ---
 title: "Lab_2.Rmd"
 output: html_document
+bibliography: data/lab2_references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -36,3 +37,5 @@ num/sum(num)
 nucleotides <- c("A", "T", "C","G")
 sort(nucleotides)
 ```
+
+# REFERENCE

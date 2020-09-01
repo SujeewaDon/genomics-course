@@ -44,3 +44,7 @@ sort(nucleotides)
 ```
 
 # REFERENCES
+[@Madera2015]
+[@Ray2018]
+[@Dumars2016]
+[@Punzo2020]

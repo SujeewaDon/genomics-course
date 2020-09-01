@@ -13,3 +13,5 @@ knitr::opts_chunk$set(echo = TRUE)
   [Lab-2](Lab_2.html)
   
 # REFERENCES
+[@Chang2015]
+[@RCoreTeam]

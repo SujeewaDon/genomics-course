@@ -1,6 +1,8 @@
 ---
 title: "Lab 2"
-output: html_document
+output: 
+  html_document:
+    theme:  readable
 bibliography: data/lab2_references.bib
 ---
 

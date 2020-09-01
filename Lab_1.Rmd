@@ -1,6 +1,8 @@
 ---
 title: "Lab 1"
-output: html_document
+output: 
+  html_document:
+    theme:  readable
 ---
 
 ```{r setup, include=FALSE}

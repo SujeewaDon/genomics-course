@@ -11,9 +11,6 @@ bibliography: data/references.bib
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-  [Lab-1](Lab_1.html)
-  [Lab-2](Lab_2.html)
+ 1. [Lab-1](Lab_1.html)
+ 2. [Lab-2](Lab_2.html)
   
-# REFERENCES
-[@Chang2015]
-[@RCoreTeam]

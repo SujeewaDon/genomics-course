@@ -11,6 +11,9 @@ bibliography: data/references.bib
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+ 
+ ![](Images/IMG_2592.JPEG)
+ 
  1. [Lab-1](Lab_1.html)
  2. [Lab-2](Lab_2.html)
   

@@ -3,7 +3,7 @@ title: "Lab 2"
 output: 
   html_document:
     theme:  readable
-bibliography: data/lab2_references.bib
+bibliography: data/references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -45,8 +45,7 @@ nucleotides <- c("A", "T", "C","G")
 sort(nucleotides)
 ```
 
+With regards to this exercise the references from [@Chang2015] and [@RCoreTeam] have been included.
+
+
 # REFERENCES
-[@Madera2015]
-[@Ray2018]
-[@Dumars2016]
-[@Punzo2020]

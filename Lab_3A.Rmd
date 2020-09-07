@@ -1,0 +1,194 @@
+---
+title: "Lab3A.Rmd"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(lubridate)
+```
+
+
+```{r, eval=FALSE}
+download.file(url = "https://ndownloader.figshare.com/files/2292169",
+              destfile = "data/portal_data_joined.csv")
+```
+
+
+
+```{r}
+surveys <- read.csv("data/portal_data_joined.csv", stringsAsFactors = TRUE)
+str(surveys)
+```
+
+Challenge-1
+
+Based on the output of str(surveys) , can you answer the following questions?
+1.What is the class of the object surveys ?
+```{r}
+print(paste(class(surveys), sep=" "))
+```
+
+
+2.How many rows and how many columns are in this object?
+```{r}
+print(paste("rows=", nrow(surveys), "columns=", ncol(surveys), sep=" "))
+```
+
+3.How many species have been recorded during these surveys?
+
+```{r}
+print(paste(length(unique(surveys$species)), sep=" "))
+```
+
+
+Challenge-2
+
+1. Create a data.frame ( surveys_200 ) containing only the data in row 200 of the
+surveys dataset.
+```{r}
+surveys_200 <-surveys[200,]
+surveys_200
+```
+
+
+2. Notice how nrow() gave you the number of rows in a data.frame ?
+
+```{r}
+nrow(surveys)
+```
+
+Use that number to pull out just that last row in the data frame.
+
+```{r}
+surveys[nrow(surveys),]
+```
+
+
+Compare that with what you see as the last row using tail() to make sure it’s
+meeting expectations.
+
+```{r}
+tail(surveys)
+```
+
+Pull out that last row using nrow() instead of the row number.
+Create a new data frame ( surveys_last ) from that last row.
+
+```{r}
+surveys_last <- surveys[nrow(surveys),]
+surveys_last
+```
+
+
+3. Use nrow() to extract the row that is in the middle of the data frame. Store the content
+of this row in an object named surveys_middle .
+```{r}
+surveys_middle <- surveys[(nrow(surveys)/2),]
+surveys_middle
+```
+
+
+4. Combine nrow() with the - notation above to reproduce the behavior of
+head(surveys) , keeping just the first through 6th rows of the surveys dataset.
+
+
+```{r}
+
+surveys[c(-7:-nrow(surveys)),]
+
+
+```
+
+
+
+
+Challenge-3
+
+Rename “F” and “M” to “female” and “male” respectively.
+Now that we have renamed the factor level to “undetermined”, can you recreate
+the barplot such that “undetermined” is last (after “male”)?
+
+```{r}
+surveys$sex<- factor(surveys$sex, levels = c("F","M", ""), labels = c("female", "male", "undetermined"))
+
+plot(as.factor(surveys$sex))
+```
+
+
+Challenge-4
+1. We have seen how data frames are created when using read.csv() , but they can also
+be created by hand with the data.frame() function. There are a few mistakes in this
+hand-crafted data.frame . Can you spot and fix them? Don’t hesitate to experiment!
+
+```{r}
+animal_data <- data.frame(animal = c("dog", "cat", "sea cucumber", "sea urchin"),
+                            feel = c("furry", "furry", "squishy", "spiny"),
+                            weight = c(45, 8, 1.1, 0.8))
+
+animal_data
+```
+
+2. Can you predict the class for each of the columns in the following example?
+Check your guesses using str(country_climate) :
+Are they what you expected? Why? Why not?
+What would have been different if we had added stringsAsFactors = FALSE
+when creating the data frame?
+What would you need to change to ensure that each column had the accurate
+data type?
+
+
+
+country_climate <- data.frame(
+country = c("Canada", "Panama", "South Africa", "Australi
+a"),
+climate = c("cold", "hot", "temperate", "hot/temperate"),
+temperature = c(10, 30, 18, "15"),
+northern_hemisphere = c(TRUE, TRUE, FALSE, "FALSE"),
+has_kangaroo = c(FALSE, FALSE, FALSE, 1)
+)
+
+
+
+```{r}
+country_climate <- data.frame(
+country = c("Canada", "Panama", "South Africa", "Australi
+a"),
+climate = c("cold", "hot", "temperate", "hot/temperate"),
+temperature = c(10, 30, 18, "15"),
+northern_hemisphere = c(TRUE, TRUE, FALSE, "FALSE"),
+has_kangaroo = c(FALSE, FALSE, FALSE, 1)
+)
+
+```
+
+Are they what you expected? Why? Why not?
+
+```{r}
+str(country_climate)
+print("No. The column 'temperature' has a character '15'. Therefore it is not numeric. The column 'northern_hemisphere' has a character 'FALSE'. Therefore it is not logical. The column 'has_kangaroo' has a number '1'. Therefore, it is not logical ")
+```
+
+What would have been different if we had added stringsAsFactors = FALSE
+when creating the data frame?
+
+```{r}
+print("For the provided data frame, setting stringsAsFactors to TRUE or FALSE does not convert the columns with texts to factors. But the once the data frame is corrected as shown below, setting stringsAsFactors = TRUE converts the columns-'country' and 'climate' to a factor ")
+```
+
+What would you need to change to ensure that each column had the accurate
+data type?
+
+```{r}
+country_climate <- data.frame(
+country = c("Canada", "Panama", "South Africa", "Australi
+a"),
+climate = c("cold", "hot", "temperate", "hot/temperate"),
+temperature = c(10, 30, 18, 15),
+northern_hemisphere = c(TRUE, TRUE, FALSE, FALSE),
+has_kangaroo = c(FALSE, FALSE, FALSE, TRUE)
+)
+
+str(country_climate)
+```
+

@@ -1,0 +1,38 @@
+---
+title: "Lab_3B.Rmd"
+output: html_document
+---
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+
+```
+
+```{r}
+surveys <- read_csv("data/portal_data_joined.csv")
+
+```
+
+Challenge-1
+
+Using pipes, subset the surveys data to include animals collected before 1995 and
+retain only the columns year , sex , and weight .
+
+```{r}
+surveys %>% 
+  filter(year < 1995) %>% 
+  select(year , sex , weight)
+```
+
+Challenge-2
+
+Create a new data frame from the surveys data that meets the following criteria:
+contains only the species_id column and a new column called hindfoot_cm
+containing the hindfoot_length values converted to centimeters. In this
+hindfoot_cm column, there are no NA s and all values are less than 3.
+Hint: think about how the commands should be ordered to produce this data frame!
+
+```{r}
+new_surveys <- surveys %>% 
+                mutate("hindfoot_cm"=hindfoot_length)
+```
+

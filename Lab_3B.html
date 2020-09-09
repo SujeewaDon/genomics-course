@@ -405,7 +405,82 @@ summary {
 <p>Challenge-2</p>
 <p>Create a new data frame from the surveys data that meets the following criteria: contains only the species_id column and a new column called hindfoot_cm containing the hindfoot_length values converted to centimeters. In this hindfoot_cm column, there are no NA s and all values are less than 3. Hint: think about how the commands should be ordered to produce this data frame!</p>
 <pre class="r"><code>new_surveys &lt;- surveys %&gt;% 
-                mutate(&quot;hindfoot_cm&quot;=hindfoot_length)</code></pre>
+                mutate(&quot;hindfoot_cm&quot;=hindfoot_length/10) %&gt;% 
+                filter(!is.na(hindfoot_cm)) %&gt;% 
+                filter(hindfoot_cm &lt; 3)%&gt;%
+                select(species_id, hindfoot_cm)
+new_surveys</code></pre>
+<pre><code>## # A tibble: 15,371 x 2
+##    species_id hindfoot_cm
+##    &lt;chr&gt;            &lt;dbl&gt;
+##  1 NL                 2.8
+##  2 NL                 2.1
+##  3 NL                 2.1
+##  4 NL                 2.9
+##  5 NL                 2.9
+##  6 DM                 2.5
+##  7 PF                 1.5
+##  8 PF                 1.6
+##  9 PF                 1.5
+## 10 PF                 1.4
+## # ... with 15,361 more rows</code></pre>
+<p>Challenge-3</p>
+<ol style="list-style-type: decimal">
+<li>How many animals were caught in each plot_type surveyed?</li>
+</ol>
+<pre class="r"><code>surveys %&gt;% 
+  count(plot_type)</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##   plot_type                     n
+##   &lt;chr&gt;                     &lt;int&gt;
+## 1 Control                   15611
+## 2 Long-term Krat Exclosure   5118
+## 3 Rodent Exclosure           4233
+## 4 Short-term Krat Exclosure  5906
+## 5 Spectab exclosure          3918</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Use group_by() and summarize() to find the mean, min, and max hindfoot length for each species (using species_id ). Also add the number of observations (hint: see ?n ).</li>
+</ol>
+<pre class="r"><code>surveys %&gt;% 
+  #filter(!is.na(hindfoot_length)) %&gt;% 
+  group_by(species_id) %&gt;% 
+  summarise(mean_hindfoot=mean(hindfoot_length, na.rm = TRUE),
+            min_hindfoot= min(hindfoot_length, na.rm = TRUE),
+            max_hindfoot= max(hindfoot_length, na.rm = TRUE),
+            number_of_observations= n())</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre><code>## # A tibble: 48 x 5
+##    species_id mean_hindfoot min_hindfoot max_hindfoot number_of_observations
+##    &lt;chr&gt;              &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;                  &lt;int&gt;
+##  1 AB                   NaN          Inf         -Inf                    303
+##  2 AH                    33           31           35                    437
+##  3 AS                   NaN          Inf         -Inf                      2
+##  4 BA                    13            6           16                     46
+##  5 CB                   NaN          Inf         -Inf                     50
+##  6 CM                   NaN          Inf         -Inf                     13
+##  7 CQ                   NaN          Inf         -Inf                     16
+##  8 CS                   NaN          Inf         -Inf                      1
+##  9 CT                   NaN          Inf         -Inf                      1
+## 10 CU                   NaN          Inf         -Inf                      1
+## # ... with 38 more rows</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>What was the heaviest animal measured in each year? Return the columns year , genus , species_id , and weight .</li>
+</ol>
+<pre class="r"><code>heaviest_animals_df&lt;-surveys %&gt;% 
+  group_by(year) %&gt;% 
+  filter(weight==max(weight, na.rm = TRUE)) %&gt;% 
+  select(year , genus , species_id , weight)
+  
+head(heaviest_animals_df,5)</code></pre>
+<pre><code>## # A tibble: 5 x 4
+## # Groups:   year [5]
+##    year genus   species_id weight
+##   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt;
+## 1  1979 Neotoma NL            274
+## 2  1986 Neotoma NL            240
+## 3  1987 Neotoma NL            278
+## 4  1988 Neotoma NL            248
+## 5  1992 Neotoma NL            220</code></pre>
 
 
 

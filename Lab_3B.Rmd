@@ -33,6 +33,49 @@ Hint: think about how the commands should be ordered to produce this data frame!
 
 ```{r}
 new_surveys <- surveys %>% 
-                mutate("hindfoot_cm"=hindfoot_length)
+                mutate("hindfoot_cm"=hindfoot_length/10) %>% 
+                filter(!is.na(hindfoot_cm)) %>% 
+                filter(hindfoot_cm < 3)%>%
+                select(species_id, hindfoot_cm)
+new_surveys
+```
+
+
+
+Challenge-3
+
+1. How many animals were caught in each plot_type surveyed?
+
+```{r}
+surveys %>% 
+  count(plot_type)
+```
+
+2. Use group_by() and summarize() to find the mean, min, and max hindfoot
+length for each species (using species_id ). Also add the number of
+observations (hint: see ?n ).
+
+```{r, warning=FALSE}
+surveys %>% 
+  #filter(!is.na(hindfoot_length)) %>% 
+  group_by(species_id) %>% 
+  summarise(mean_hindfoot=mean(hindfoot_length, na.rm = TRUE),
+            min_hindfoot= min(hindfoot_length, na.rm = TRUE),
+            max_hindfoot= max(hindfoot_length, na.rm = TRUE),
+            number_of_observations= n())
+  
+```
+
+3. What was the heaviest animal measured in each year? Return the columns
+year , genus , species_id , and weight .
+
+
+```{r}
+heaviest_animals_df<-surveys %>% 
+  group_by(year) %>% 
+  filter(weight==max(weight, na.rm = TRUE)) %>% 
+  select(year , genus , species_id , weight)
+  
+head(heaviest_animals_df,5)
 ```
 

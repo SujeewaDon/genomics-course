@@ -12,7 +12,7 @@ bibliography: data/references.bib
 knitr::opts_chunk$set(echo = TRUE)
 ```
  
- ![](Images/IMG_2592.JPEG)
+ ![](Images/IMG_2592.JPEG){width=25%}
  
  1. [Lab-1](Lab_1.html)
  2. [Lab-2](Lab_2.html)

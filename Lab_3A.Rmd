@@ -16,12 +16,24 @@ download.file(url = "https://ndownloader.figshare.com/files/2292169",
               destfile = "data/portal_data_joined.csv")
 ```
 
-
+# Reading a CSV file
 
 ```{r}
 surveys <- read.csv("data/portal_data_joined.csv", stringsAsFactors = TRUE)
+```
+
+```{r}
+head(surveys)
+```
+
+```{r}
+view(surveys)
+```
+
+```{r}
 str(surveys)
 ```
+
 
 ## **Challenge 1**
 
@@ -42,6 +54,36 @@ print(paste("rows=", nrow(surveys), "columns=", ncol(surveys), sep=" "))
 ```{r}
 print(paste(length(unique(surveys$species)), sep=" "))
 ```
+
+
+
+# Indexing and subsetting data frames
+
+```{r, results='hide'}
+# first element in the first column of the data frame (as a vector)
+surveys[1, 1]
+# first element in the 6th column (as a vector)
+surveys[1, 6]
+# first column of the data frame (as a vector)
+surveys[, 1]
+# first column of the data frame (as a data.frame)
+surveys[1]
+# first three elements in the 7th column (as a vector)
+surveys[1:3, 7]
+# the 3rd row of the data frame (as a data.frame)
+surveys[3, ]
+# equivalent to head_surveys <- head(surveys)
+head_surveys <- surveys[1:6, ]
+```
+```{r, results='hide'}
+surveys[, -1] # The whole data frame, except the first column
+surveys[-(7:34786), ] # Equivalent to head(surveys)
+surveys["species_id"] # Result is a data.frame
+surveys[, "species_id"] # Result is a vector
+surveys[["species_id"]] # Result is a vector
+surveys$species_id # Result is a vector
+```
+
 
 
 ## **Challenge 2**
@@ -102,6 +144,56 @@ surveys[c(-7:-nrow(surveys)),]
 
 ```
 
+# Factors
+
+
+```{r}
+sex <- factor(c("male", "female", "female", "male"))
+```
+
+```{r}
+levels(sex)
+nlevels(sex)
+```
+
+```{r}
+sex <- factor(sex, levels = c("male", "female"))
+sex # after re-ordering
+```
+
+
+## Converting to factors
+```{r}
+as.character(sex)
+year_fct <- factor(c(1990, 1983, 1977, 1998, 1990))
+as.numeric(levels(year_fct))[year_fct]
+```
+
+## Renaming factors
+
+```{r}
+plot(as.factor(surveys$sex))
+```
+
+```{r}
+sex <- factor(surveys$sex)
+head(sex)
+```
+
+```{r}
+levels(sex)
+```
+
+```{r}
+levels(sex)[1] <- "undetermined"
+levels(sex)
+```
+
+```{r}
+head(sex)
+```
+
+
 
 
 
@@ -115,6 +207,19 @@ the barplot such that “undetermined” is last (after “male”)?
 surveys$sex<- factor(surveys$sex, levels = c("F","M", ""), labels = c("female", "male", "undetermined"))
 
 plot(as.factor(surveys$sex))
+```
+
+```{r}
+## Compare the difference between our data read as `factor` vs `character`.
+surveys <- read.csv("data/portal_data_joined.csv", stringsAsFactors = TRUE)
+str(surveys)
+## Convert the column "plot_type" into a factor
+```
+
+```{r}
+surveys <- read.csv("data/portal_data_joined.csv", stringsAsFactors = FALSE)
+str(surveys)
+surveys$plot_type <- factor(surveys$plot_type)
 ```
 
 
@@ -193,5 +298,47 @@ has_kangaroo = c(FALSE, FALSE, FALSE, TRUE)
 )
 
 str(country_climate)
+```
+
+
+# Formatting Dates
+
+```{r}
+str(surveys)
+```
+
+```{r}
+my_date <- ymd("2015-01-01")
+str(my_date)
+```
+
+```{r}
+my_date <- ymd(paste("2015", "1", "1", sep = "-"))
+str(my_date)
+```
+
+```{r, results='hide'}
+paste(surveys$year, surveys$month, surveys$day, sep = "-")
+```
+
+```{r, results='hide'}
+ymd(paste(surveys$year, surveys$month, surveys$day, sep = "-"))
+```
+
+```{r}
+surveys$date <- ymd(paste(surveys$year, surveys$month, surveys$day, sep ="-"))
+```
+
+```{r}
+str(surveys)
+```
+
+```{r}
+summary(surveys$date)
+```
+
+```{r}
+missing_dates <- surveys[is.na(surveys$date), c("year", "month", "day")]
+head(missing_dates)
 ```
 

@@ -1,6 +1,8 @@
 ---
-title: "Lab3A.Rmd"
+title: "Lab3A"
 output: html_document
+theme:  readable
+
 ---
 
 ```{r, echo=FALSE, message=FALSE}
@@ -21,7 +23,7 @@ surveys <- read.csv("data/portal_data_joined.csv", stringsAsFactors = TRUE)
 str(surveys)
 ```
 
-Challenge-1
+## **Challenge 1**
 
 Based on the output of str(surveys) , can you answer the following questions?
 1.What is the class of the object surveys ?
@@ -42,7 +44,7 @@ print(paste(length(unique(surveys$species)), sep=" "))
 ```
 
 
-Challenge-2
+## **Challenge 2**
 
 1. Create a data.frame ( surveys_200 ) containing only the data in row 200 of the
 surveys dataset.
@@ -103,7 +105,7 @@ surveys[c(-7:-nrow(surveys)),]
 
 
 
-Challenge-3
+## **Challenge 3**
 
 Rename “F” and “M” to “female” and “male” respectively.
 Now that we have renamed the factor level to “undetermined”, can you recreate
@@ -116,7 +118,8 @@ plot(as.factor(surveys$sex))
 ```
 
 
-Challenge-4
+## **Challenge 4**
+
 1. We have seen how data frames are created when using read.csv() , but they can also
 be created by hand with the data.frame() function. There are a few mistakes in this
 hand-crafted data.frame . Can you spot and fix them? Don’t hesitate to experiment!

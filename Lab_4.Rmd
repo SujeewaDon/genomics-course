@@ -153,23 +153,59 @@ ggplot(data=arranged_report_09132020, mapping = aes(x=Country_Region, y=Deaths))
 
 ### Cases on 3/12/2020
 ```{r}
-ggplot(data=arranged_cases_report_03132020, mapping = aes(x=Country_Region, y=Total_confirmed))+geom_bar(stat = "identity")
+US_cases_report_03132020 <- report_03132020 %>%
+  filter(Country_Region=="US") %>% 
+  group_by(Province_State) %>% 
+  summarise(Total_confirmed=sum(Confirmed)) %>% 
+  arrange(desc(Total_confirmed)) %>% 
+  slice(seq(1,10,1))
+
+datatable(US_cases_report_03132020)
+
+
+ggplot(data=US_cases_report_03132020, mapping = aes(x=Province_State, y=Total_confirmed))+geom_bar(stat = "identity")
 ```
 
 
 ### Deaths on 3/12/2020
 ```{r}
-ggplot(data=arranged_report_03132020, mapping = aes(x=Country_Region, y=Deaths))+geom_bar(stat = "identity")
+US_deaths_report_03132020 <- report_03132020 %>%
+  filter(Country_Region=="US") %>% 
+  group_by(Province_State) %>% 
+  summarise(Total_Deaths=sum(Deaths)) %>% 
+  arrange(desc(Total_Deaths)) %>% 
+  slice(seq(1,10,1))
+
+datatable(US_deaths_report_03132020)
+ggplot(data=US_deaths_report_03132020, mapping = aes(x=Province_State, y=Total_Deaths))+geom_bar(stat = "identity")
 ```
 
 
 
 ### Cases on 9/12/2020
 ```{r}
-ggplot(data=arranged_cases_report_09132020, mapping = aes(x=Country_Region, y=Total_confirmed))+geom_bar(stat = "identity")
+US_cases_report_09132020 <- report_09132020 %>%
+  filter(Country_Region=="US") %>% 
+  group_by(Province_State) %>% 
+  summarise(Total_confirmed=sum(Confirmed)) %>% 
+  arrange(desc(Total_confirmed)) %>% 
+  slice(seq(1,10,1))
+
+datatable(US_cases_report_09132020)
+
+
+ggplot(data=US_cases_report_09132020, mapping = aes(x=Province_State, y=Total_confirmed))+geom_bar(stat = "identity")
 ```
 
 ### Deaths on 9/12/2020
 ```{r}
-ggplot(data=arranged_report_09132020, mapping = aes(x=Country_Region, y=Deaths))+geom_bar(stat = "identity")
+US_deaths_report_09132020 <- report_09132020 %>%
+  filter(Country_Region=="US") %>% 
+  group_by(Province_State) %>% 
+  summarise(Total_Deaths=sum(Deaths)) %>% 
+  arrange(desc(Total_Deaths)) %>% 
+  slice(seq(1,10,1))
+
+datatable(US_deaths_report_09132020)
+ggplot(data=US_deaths_report_09132020, mapping = aes(x=Province_State, y=Total_Deaths))+geom_bar(stat = "identity")
 ```

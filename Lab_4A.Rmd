@@ -1,0 +1,137 @@
+---
+title: "Lab 4A"
+output: html_document
+theme: readable
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(hexbin)
+```
+
+
+# Plotting with ggplot2
+
+```{r}
+surveys_complete <- read_csv("Results/surveys_complete.csv")
+
+ggplot(data=surveys_complete, mapping = aes(x=weight, y=hindfoot_length))+
+  geom_point()
+```
+```{r}
+surveys_plot<-ggplot(data=surveys_complete, mapping = aes(x=weight, y=hindfoot_length))
+
+surveys_plot+geom_point()
+```
+
+## **Challenge**
+Scatter plots can be useful exploratory tools for small datasets. For data sets withlarge numbers of observations, such as the surveys_complete data set, overplottingof points can be a limitation of scatter plots. One strategy for handling such settingsis to use hexagonal binning of observations. The plot space is tessellated intohexagons. Each hexagon is assigned a color based on the number of observationsthat fall within its boundaries. To use hexagonal binning with ggplot2, first install theR package hexbin from CRAN:
+
+
+```{r}
+surveys_plot+geom_hex()
+```
+What are the relative strengths and weaknesses of a hexagonal bin plotcompared to a scatter plot? Examine the above scatter plot and compare it withthe hexagonal bin plot that you created.
+
+```{r, echo=FALSE}
+print("Strengths of hexagonal plot- density of data points can be observed. Over plotting issue arised in geo_scatter plots is fixed by hexagonal plotting. 
+
+Weaknes of hexagonal plot- individual data points cannot be seen. Hence, the number of data points used to plot cannot be seen.")
+```
+
+# Building your plots iteratively
+
+```{r}
+ggplot(data =surveys_complete, aes(x = weight,y =hindfoot_length))+
+geom_point()
+```
+```{r}
+ggplot(data =surveys_complete, aes(x = weight,y =hindfoot_length))+
+geom_point(alpha=0.1)
+```
+
+```{r}
+ggplot(data =surveys_complete, aes(x = weight,y =hindfoot_length))+
+geom_point(alpha=0.1, color="blue")
+```
+```{r}
+ggplot(data =surveys_complete, aes(x = weight,y =hindfoot_length))+
+geom_point(aes(color=species_id), alpha=0.1)
+```
+
+## **Challenge**
+Use what you just learned to create a scatter plot of weight over species_id with the plot types showing in different colors. Is this a good way to show this type of data?
+
+```{r}
+ggplot(data =surveys_complete, aes(x = weight,y =species_id))+
+geom_point(aes(color=species_id), alpha=0.1)
+```
+
+```{r, echo=FALSE}
+print("This is not a good way to show this type of data because it does not show, mean, standard erros/ deviations of the data set. Therefore different species weights cannot be statistically compared")
+```
+
+
+# Boxplot
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_boxplot()
+```
+
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_boxplot(alpha=0)+
+  geom_jitter(alpha=0.3, color= "tomato")
+```
+
+What do you need to change inthe code to put the boxplot in front of the points such that it’s not hidden?
+
+
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_jitter(alpha=0.3, color= "tomato")+
+  geom_boxplot(alpha=0)
+```
+
+## **Challenges**
+
+Replace the box plot with a violin plot; see geom_violin()
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_jitter(alpha=0.3, color= "tomato")+
+  geom_violin()
+```
+
+
+
+Represent weight on the logscale; see scale_y_log10()
+
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_jitter(alpha=0.3, color= "tomato")+
+  geom_violin()+
+  scale_y_log10()
+```
+
+Create boxplot for hindfoot_length. Overlay the boxplot layer on a jitter layer to show actual measurements
+
+```{r}
+ggplot(data=surveys_complete, mapping = aes(x= species_id, y=hindfoot_length))+
+  geom_jitter( aes(color=as.factor(plot_id)), alpha=0.3)+
+  geom_boxplot(alpha=0)
+```
+Hint: Check the class for
+plot_id
+. Consider changing the class of
+plot_id
+from integer to factor. Why does this change how R makes the graph?
+
+```{r, echo=FALSE}
+print("When plot_id is in the class numeric R assign colors to plot_id as a gradient. But When it is a factor each factor is colored as a distinct category")
+```
+

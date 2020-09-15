@@ -1,0 +1,175 @@
+---
+title: "Lab 4"
+output: html_document
+theme: readable
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(DT)
+```
+
+```{r}
+report_03_11_2020 <- read_csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-11-2020.csv")) %>% 
+  rename(Country_Region= "Country/Region", Province_State = "Province/State")
+
+str(report_03_11_2020)
+view(report_03_11_2020)
+```
+```{r}
+datatable(report_03_11_2020)
+```
+
+
+# Exercise (Part-1)
+
+1. The format of the daily reports has changed over time. What are the differences between 3/13/2020, the Friday before spring break2020 and yesterday 6 months later on 9/13/2020? Load the files into R and use
+str() and View() (or in the top right corner click on Environment and then the data frame.). Note the in the more recent dates they have changed the column headers so that it is no longer necessary to rename
+Province_State and Country_Region.
+
+```{r}
+report_03132020 <- read_csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-13-2020.csv")) %>% 
+  rename(Province_State= "Province/State", Country_Region= "Country/Region")
+datatable(report_03132020)
+print(str(report_03132020))
+```
+
+```{r}
+report_09132020 <- read_csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/09-13-2020.csv")) #%>% 
+  #rename(Province_State= "Province/State", Country_Region= "Country/Region")
+datatable(report_09132020)
+print(str(report_09132020))
+```
+
+
+```{r, echo=FALSE}
+print(paste("The report from 03/13/2020 has", nrow(report_03132020), "rows and", ncol(report_03132020),"columns while report from 09/13/2020 has", nrow(report_09132020), "rows and", ncol(report_09132020), "columns.", "While  column names;",paste(intersect(colnames(report_03132020),colnames(report_09132020)), collapse = ", "), "exist in both dataframes, column names;", paste(setdiff(colnames(report_03132020),colnames(report_09132020)), collapse = ", "), "exist only in report from 03/13/2020 while column names;", paste(setdiff(colnames(report_09132020),colnames(report_03132020)), collapse = ", "), "exist only in the report from 09/13/2020. Lastly, report from 03/13/2020 has columns with '/'(eg. Provice/State and Country/Region) while report from  09/13/2020 does not have such columns" , sep=" "))
+```
+
+2.
+Many countries have multiple entries representing different regions (e.g. counties and states). To get the counts for a country weneed to summarise the data. Use group_by() and summarize() to make a data frame (tibble) with total counts for each country.
+
+```{r}
+counts_report_03132020 <- report_03132020 %>% 
+  group_by(Country_Region) %>% 
+  summarise(Total_Confirmed=sum(Confirmed), Total_Deaths= sum(Deaths), Total_Recovered= sum(Recovered))
+
+datatable(counts_report_03132020)
+```
+```{r}
+counts_report_09132020 <- report_09132020 %>% 
+  group_by(Country_Region) %>% 
+  summarise(Total_Confirmed=sum(Confirmed), Total_Deaths= sum(Deaths), Total_Recovered= sum(Recovered))
+
+datatable(counts_report_09132020)
+```
+
+3. To get counts for confirmed cases per U.S state use filter() to select US and group_by and summarize as above.
+
+```{r}
+counts_for_confirmed_cases_per_US_state_03132020 <- report_03132020 %>% 
+  filter(Country_Region=="US") %>% 
+  group_by(Province_State) %>% 
+  summarise(Total_Confirmed= sum(Confirmed))
+
+datatable(counts_for_confirmed_cases_per_US_state_03132020)
+```
+
+```{r}
+counts_for_confirmed_cases_per_US_state_09132020 <- report_09132020 %>% 
+  filter(Country_Region=="US") %>% 
+  group_by(Province_State) %>% 
+  summarise(Total_Confirmed= sum(Confirmed))
+
+datatable(counts_for_confirmed_cases_per_US_state_09132020)
+```
+
+
+4.
+It will be difficult to make simple graphs with the data from all countries in the world or even the US states. Use arrange_by() and slice() to get just the top 10 countries for Deaths.
+
+```{r}
+arranged_report_03132020 <- report_03132020 %>%
+  group_by(Country_Region) %>% 
+  summarise(Deaths=sum(Deaths)) %>% 
+  arrange(desc(Deaths)) %>% 
+  slice(seq(1,10,1))
+
+datatable(arranged_report_03132020)
+```
+
+```{r}
+arranged_report_09132020 <- report_09132020 %>%
+  group_by(Country_Region) %>% 
+  summarise(Deaths=sum(Deaths)) %>% 
+  arrange(desc(Deaths)) %>% 
+  slice(seq(1,10,1))
+
+datatable(arranged_report_09132020)
+```
+## **Exercises (Part 2)**
+
+5. Make plots using geom_point() of the 10 countries with the confirmed cases and deaths (two separate graphs) on 3/12/2020 and9/12/2020.
+
+### Cases on 3/12/2020
+```{r}
+arranged_cases_report_03132020 <- report_03132020 %>%
+  group_by(Country_Region) %>% 
+  summarise(Total_confirmed=sum(Confirmed)) %>% 
+  arrange(desc(Total_confirmed)) %>% 
+  slice(seq(1,10,1))
+
+datatable(arranged_cases_report_03132020)
+
+ggplot(data=arranged_cases_report_03132020, mapping = aes(x=Country_Region, y=Total_confirmed))+geom_point()
+```
+### Deaths on 3/12/2020
+```{r}
+ggplot(data=arranged_report_03132020, mapping = aes(x=Country_Region, y=Deaths))+geom_point()
+```
+
+
+
+
+### Cases on 9/12/2020
+```{r}
+arranged_cases_report_09132020 <- report_09132020 %>%
+  group_by(Country_Region) %>% 
+  summarise(Total_confirmed=sum(Confirmed)) %>% 
+  arrange(desc(Total_confirmed)) %>% 
+  slice(seq(1,10,1))
+
+datatable(arranged_cases_report_09132020)
+
+ggplot(data=arranged_cases_report_09132020, mapping = aes(x=Country_Region, y=Total_confirmed))+geom_point()
+```
+
+### Deaths on 3/12/2020
+```{r}
+ggplot(data=arranged_report_09132020, mapping = aes(x=Country_Region, y=Deaths))+geom_point()
+```
+
+6. Make using geom_bar of the 10 states with the most confirmed cases and deaths (two separate graphs) on 3/12/2020 and9/12/2020.
+
+### Cases on 3/12/2020
+```{r}
+ggplot(data=arranged_cases_report_03132020, mapping = aes(x=Country_Region, y=Total_confirmed))+geom_bar(stat = "identity")
+```
+
+
+### Deaths on 3/12/2020
+```{r}
+ggplot(data=arranged_report_03132020, mapping = aes(x=Country_Region, y=Deaths))+geom_bar(stat = "identity")
+```
+
+
+
+### Cases on 9/12/2020
+```{r}
+ggplot(data=arranged_cases_report_09132020, mapping = aes(x=Country_Region, y=Total_confirmed))+geom_bar(stat = "identity")
+```
+
+### Deaths on 3/12/2020
+```{r}
+ggplot(data=arranged_report_09132020, mapping = aes(x=Country_Region, y=Deaths))+geom_bar(stat = "identity")
+```

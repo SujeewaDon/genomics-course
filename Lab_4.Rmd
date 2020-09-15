@@ -169,7 +169,7 @@ ggplot(data=arranged_report_03132020, mapping = aes(x=Country_Region, y=Deaths))
 ggplot(data=arranged_cases_report_09132020, mapping = aes(x=Country_Region, y=Total_confirmed))+geom_bar(stat = "identity")
 ```
 
-### Deaths on 3/12/2020
+### Deaths on 9/12/2020
 ```{r}
 ggplot(data=arranged_report_09132020, mapping = aes(x=Country_Region, y=Deaths))+geom_bar(stat = "identity")
 ```

@@ -1,0 +1,205 @@
+---
+title: "Lab 5A"
+output: html_document
+theme: readable
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+
+```
+
+
+
+# Boxplot
+
+```{r}
+surveys_complete <- read_csv("Results/surveys_complete.csv")
+
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_boxplot()
+```
+
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_boxplot(alpha=0)+
+  geom_jitter(alpha=0.3, color= "tomato")
+```
+
+What do you need to change inthe code to put the boxplot in front of the points such that it’s not hidden?
+
+
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_jitter(alpha=0.3, color= "tomato")+
+  geom_boxplot(alpha=0)
+```
+
+## **Challenges**
+
+Replace the box plot with a violin plot; see geom_violin()
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_jitter(alpha=0.3, color= "tomato")+
+  geom_violin()
+```
+
+
+
+Represent weight on the logscale; see scale_y_log10()
+
+
+```{r}
+ggplot(data=surveys_complete, mapping=aes(x=species_id, y= weight))+
+  geom_jitter(alpha=0.3, color= "tomato")+
+  geom_violin()+
+  scale_y_log10()
+```
+
+Create boxplot for hindfoot_length. Overlay the boxplot layer on a jitter layer to show actual measurements
+
+```{r}
+ggplot(data=surveys_complete, mapping = aes(x= species_id, y=hindfoot_length))+
+  geom_jitter( aes(color=as.factor(plot_id)), alpha=0.3)+
+  geom_boxplot(alpha=0)
+```
+Hint: Check the class for
+plot_id
+. Consider changing the class of
+plot_id
+from integer to factor. Why does this change how R makes the graph?
+
+```{r, echo=FALSE}
+print("When plot_id is in the class numeric R assign colors to plot_id as a gradient. But When it is a factor each factor is colored as a distinct category")
+```
+
+# Ploting time series data
+
+Calculate number of counts per year for each genus
+
+```{r}
+yearly_counts <- surveys_complete %>% 
+ count(year,genus)
+```
+
+```{r}
+ggplot(data=yearly_counts, aes(x=year, y=n))+
+  geom_line()
+```
+```{r}
+ggplot(data=yearly_counts, aes(x=year, y=n))+
+  geom_line(aes(group=genus))
+```
+```{r}
+ggplot(data=yearly_counts, aes(x=year, y=n))+
+  geom_line(aes(group=genus, color=genus))
+```
+
+# Integrating the pipe operator with ggplot2
+
+```{r}
+yearly_counts %>% 
+ggplot(aes(x=year, y=n))+
+  geom_line(aes(group=genus, color=genus))
+```
+```{r}
+yearly_counts_graph <- surveys_complete %>% 
+ count(year,genus) %>%
+ ggplot(aes(x=year, y=n))+
+  geom_line(aes(group=genus, color=genus))
+
+yearly_counts_graph
+```
+
+# Faceting
+
+```{r}
+ggplot(data=yearly_counts, aes(x=year, y=n))+
+  geom_line(aes(group=genus, color=genus))+
+  facet_wrap(facets = vars(genus))
+```
+
+```{r}
+yearly_sex_counts <- surveys_complete %>% 
+  count(year, genus, sex)
+```
+
+```{r}
+ggplot(data=yearly_sex_counts, mapping = aes(x=year, y= n))+
+  geom_line(aes(color= sex))+
+  facet_wrap(facets = vars(genus))
+```
+```{r}
+ggplot(data = yearly_sex_counts, 
+       mapping = aes(x = year, y = n, color = sex)) +
+  geom_line() +
+  facet_grid(rows = vars(sex), cols =  vars(genus))
+```
+
+```{r}
+ggplot(data = yearly_sex_counts, 
+       mapping = aes(x = year, y = n, color = sex)) +
+  geom_line() +
+  facet_grid(rows = vars(genus))
+```
+
+```{r}
+ggplot(data = yearly_sex_counts, 
+       mapping = aes(x = year, y = n, color = sex)) +
+  geom_line() +
+  facet_grid(cols =  vars(genus))
+```
+
+
+# ggplot2 themes
+
+```{r}
+ggplot(data = yearly_sex_counts, 
+       mapping = aes(x = year, y = n, color = sex)) +
+  geom_line() +
+  facet_grid(cols =  vars(genus))+
+  theme_bw()
+```
+
+## **Challenge**
+
+
+Use what you just learned to create a plot that depicts how the average weight of each species changes through the years.
+
+```{r, fig.width=10}
+surveys_complete %>% 
+  group_by(species, year) %>% 
+  summarise(Mean_weight= mean(weight)) %>% 
+  ggplot(aes(x=year, y=Mean_weight))+
+  geom_line(aes(color=species))+
+  facet_wrap(facets = vars(species), scales = "free_y")+
+  theme_classic()
+  
+```
+
+```{r, fig.width=10}
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color = sex)) +
+    geom_line() +
+    facet_wrap(vars(genus))+
+  labs(title = "Observed genera through time",
+       x="Year of observation",
+       y= "Number of individuals")+
+  theme_classic()+
+  theme(text = element_text(size=16))
+```
+
+```{r, fig.width=10}
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color = sex)) +
+    geom_line() +
+    facet_wrap(vars(genus))+
+  labs(title = "Observed genera through time",
+       x="Year of observation",
+       y= "Number of individuals")+
+  theme_classic()+
+  theme(axis.title.x = element_text(colour = "grey20", size = 12, angle = 90, hjust = 0.5, vjust = 0.5),
+        text = element_text(size=16))
+```
+

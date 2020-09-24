@@ -199,7 +199,81 @@ ggplot(data = yearly_sex_counts, aes(x = year, y = n, color = sex)) +
        x="Year of observation",
        y= "Number of individuals")+
   theme_classic()+
-  theme(axis.title.x = element_text(colour = "grey20", size = 12, angle = 90, hjust = 0.5, vjust = 0.5),
+  theme(axis.text.x = element_text(colour = "grey20", size = 12, angle = 90, hjust = 0.5, vjust = 0.5),
+        axis.title.y = element_text(colour = "grey20", size = 12),
+        strip.text = element_text(face="italic"),
         text = element_text(size=16))
+```
+```{r}
+grey_theme <- theme(axis.text.x = element_text(colour = "grey20", size = 12, angle = 90, hjust = 0.5, vjust = 0.5),
+        axis.title.y = element_text(colour = "grey20", size = 12),
+        strip.text = element_text(face="italic"),
+        text = element_text(size=16))
+
+ggplot(surveys_complete, aes(x=species_id, y= hindfoot_length))+
+  geom_boxplot()+
+  grey_theme
+```
+
+## **Challenge**
+Improve one of the plots generated in this exercise or create a beautiful graph of your own.
+
+```{r, fig.width=10}
+ggplot(data = yearly_sex_counts, aes(x = year, y = n, color = sex)) +
+    geom_line() +
+    facet_wrap(vars(genus), scales = "free_y")+
+  labs(title = "Observed genera through time",
+       x="Year of observation",
+       y= "Number of individuals")+
+#scale_color_discrete(name="Sex of Genus", labels = c("F"="Female","M"="Male"), aesthetics=c("color"))+
+  scale_color_manual( breaks =c("F","M"), labels=c("Female","Male") ,values=c("#000000", "#E69F00"))+
+  theme_classic()+
+  theme(axis.line = element_line(size = 1))
+```
+# Arranging and exporting plots
+
+```{r, message=FALSE}
+library(gridExtra)
+```
+
+```{r}
+spp_weight_boxplot <- ggplot(data = surveys_complete, 
+                             aes(x = species_id, y = weight)) +
+  geom_boxplot() +
+  labs(x = "Species", 
+       y = expression(log[10](Weight))) +
+  scale_y_log10() + 
+  labs()
+
+spp_count_plot <- ggplot(data = yearly_counts, 
+                         aes(x = year, y = n, color = genus)) +
+  geom_line() + 
+  labs(x = "Year", y = "Abundance")
+
+grid.arrange(spp_weight_boxplot, spp_count_plot, ncol=2, widths= c(4,6))
+```
+```{r}
+my_plot <- ggplot(data = yearly_sex_counts, 
+                  aes(x = year, y = n, color = sex)) +
+    geom_line() +
+    facet_wrap(vars(genus)) +
+    labs(title = "Observed genera through time",
+        x = "Year of observation",
+        y = "Number of individuals") +
+    theme_bw() +
+    theme(axis.text.x = element_text(colour = "grey20", size = 12, angle = 90,
+                                     hjust = 0.5, vjust = 0.5),
+          axis.text.y = element_text(colour = "grey20", size = 12),
+          text = element_text(size = 16))
+
+ggsave(filename = "Observed genera through time.png", plot = my_plot, width = 15, height = 10)
+```
+
+
+```{r}
+combo_plot <- grid.arrange(spp_weight_boxplot, spp_count_plot, ncol = 2, 
+                           widths = c(4, 6))
+
+ggsave(filename = "combo_plot_abun_weight.png", plot = combo_plot, width = 15, height = 10, dpi=300)
 ```
 

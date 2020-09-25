@@ -232,6 +232,7 @@ time_series_long_joined_counts %>%
 ```{r, fig.width= 10, fig.height= 10}
 Confirmed_State_3_13_9_13_joined_long %>% 
   ggplot(mapping = aes(x=Confirmed, y=Province_State))+ geom_bar(aes(fill=Date, group=Date), stat = "identity", position = position_dodge())+
+  scale_x_continuous(expand = c(0,0))+
   theme_classic()
 ```
 
@@ -246,12 +247,57 @@ Confirmed_State_3_13_9_13_joined_long %>%
   labs(title = "COVID 19 Cases Comparisons",
        x= "Number of Confirmed Cases",
        y= "State/Province")+
+  scale_x_continuous(expand = c(0,0))+
   theme_classic()
 ```
 
 
+4. Using the time series data. Make a plot of the total number of confirmed deaths per day worldwide
 
+```{r}
+time_series_long_joined %>% 
+  group_by(Date) %>% 
+  summarise("Total_Number_of_Deaths"= sum(Deaths)) %>% 
+  ggplot(mapping = aes(x=Date, y=Total_Number_of_Deaths))+
+  geom_line(color= "#E69F00", size=2)+
+  scale_y_continuous(expand = c(0,0))+
+  theme_classic()
+```
 
+5. Use Mutate to make a new column with deaths/confirmed cases (Hint: this might be best done afterjoining the tables, but before pivoting longer).
 
+```{r}
+deaths_to_confirmed_df<-time_series_long_joined %>% 
+  mutate("deaths_to_confirmed"=Deaths/Confirmed)
+
+head(deaths_to_confirmed_df)
+```
+
+6. Plot US deaths/confirmed
+
+```{r}
+deaths_to_confirmed_df%>% 
+  filter(Country_Region=="US") %>% 
+  group_by(Date) %>% 
+  summarise("Total_deaths_to_confirmed"= sum(deaths_to_confirmed)) %>% 
+  ggplot(mapping = aes(x=Date, y=Total_deaths_to_confirmed))+
+  geom_line(color= "#E69F00", size=2)+
+  scale_y_continuous(expand = c(0,0))+
+  theme_classic()
+```
+
+7. Make a single graph with from the times series data with the 10 countries with the highest death total.
+
+```{r}
+time_series_long_joined %>% 
+  group_by(Country_Region) %>% 
+  summarise("Death_Total"= sum(Deaths)) %>% 
+  arrange(desc(Death_Total)) %>% 
+  head(10) %>% 
+  ggplot(mapping = aes(x=Country_Region, y=Death_Total))+
+  geom_bar(fill="#56B4E9", stat="identity")+
+  scale_y_continuous(expand = c(0,0))+
+  theme_classic()
+```
 
 

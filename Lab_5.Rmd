@@ -319,7 +319,7 @@ time_series_long_joined %>%
 
 8. Using Facet_Wraps make a graph from the times series data with the 10 countries with the hightest death total. Format the table to look nice in the report by changing the number of rows in your graph and/or adjusting the height in the R code chunk header.
 
-```{r}
+```{r,fig.width= 10, fig.height=5, fig.align='center'}
 top_ten_sep_df <-time_series_long_joined %>% 
   filter(Country_Region %in% ten_highest_deaths_df$Country_Region) %>% 
   group_by(Country_Region, Date) %>% 
@@ -345,7 +345,7 @@ datatable(top_ten_sep_df)
 download.file(url="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv", 
                destfile = "data/time_series_covid19_confirmed_US.csv")
 ```
-```{r, fig.width= 10, fig.height=15}
+```{r, fig.width= 10, fig.height=15, fig.align='center'}
 time_series_confirmed_US<-  read_csv(file="data/time_series_covid19_confirmed_US.csv")
 
 us_confirmed_df <-time_series_confirmed_US %>%

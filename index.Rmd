@@ -20,6 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
  4. [Lab-3B](Lab_3B.html)
  5. [Lab-4](Lab_4.html)
  6. [Lab-4A](Lab_4A.html)
- 7. [Lab-5A](Lab_5A.html)
+ 7. [Lab-5](Lab_5.html)
+ 8. [Lab-5A](Lab_5A.html)
  
   

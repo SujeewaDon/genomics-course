@@ -224,8 +224,30 @@ time_series_long_joined_counts %>%
   ggtitle("US COVID-19 Cases")
 ```
 
+## **Exercise**
+
+1. Uploaded the answers in [Lab 5A](Lab_5A.html)
+2. Revise the above example for joining tables using 6/13/2020 and 9/13/2020. Plot the data as a bar plot. Make sure your graph looks nice in the report by adjusting the height of the graph in the R code chunk header.
+
+```{r, fig.width= 10, fig.height= 10}
+Confirmed_State_3_13_9_13_joined_long %>% 
+  ggplot(mapping = aes(x=Confirmed, y=Province_State))+ geom_bar(aes(fill=Date, group=Date), stat = "identity", position = position_dodge())+
+  theme_classic()
+```
 
 
+
+3. Add more informative x and y labels and a title to the above graph in Ex2.
+
+```{r, fig.width= 10, fig.height= 10}
+Confirmed_State_3_13_9_13_joined_long %>% 
+  ggplot(mapping = aes(x=Confirmed, y=Province_State))+
+  geom_bar(aes(fill=Date, group=Date), stat = "identity", position = position_dodge()) +
+  labs(title = "COVID 19 Cases Comparisons",
+       x= "Number of Confirmed Cases",
+       y= "State/Province")+
+  theme_classic()
+```
 
 
 

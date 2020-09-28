@@ -7,10 +7,11 @@ theme: readable
 ```{r, message=FALSE}
 library(tidyverse)
 library(lubridate)
-
+library(plotly)
 ```
 
 
+# Data for the lab
 ```{r}
 time_series_confirmed_long <- read_csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")) %>%
   rename(Province_State = "Province/State", Country_Region = "Country/Region")  %>% 
@@ -39,3 +40,74 @@ time_series_long_joined_counts <- time_series_long_joined %>%
                names_to = "Report_Type", values_to = "Counts")
 ```
 
+# Fine tunning ggplots
+
+## Graphic Output
+
+```{r}
+# Plot graph to a pdf outputfile
+pdf("images/time_series_example_plot.pdf", width=6, height=3)
+time_series_long_joined %>% 
+  group_by(Country_Region,Date) %>% 
+  summarise_at(c("Confirmed", "Deaths"), sum) %>% 
+  filter (Country_Region == "US") %>% 
+    ggplot(aes(x = Date,  y = Deaths)) + 
+    geom_point() +
+    geom_line() +
+    ggtitle("US COVID-19 Deaths")
+dev.off()
+```
+
+```{r}
+# Plot graph to a png outputfile
+ppi <- 300
+png("images/time_series_example_plot.png", width=6*ppi, height=6*ppi, res=ppi)
+time_series_long_joined %>% 
+  group_by(Country_Region,Date) %>% 
+  summarise_at(c("Confirmed", "Deaths"), sum) %>% 
+  filter (Country_Region == "US") %>% 
+    ggplot(aes(x = Date,  y = Deaths)) + 
+    geom_point() +
+    geom_line() +
+    ggtitle("US COVID-19 Deaths")
+dev.off()
+```
+
+
+# RMarkdown loading images
+
+![US COVID-19 Deaths](images/time_series_example_plot.png)
+
+
+<img src="images/time_series_example_plot.png" alt="US COVID-19 Deaths" style="width: 600px;"/>
+
+
+
+## Interactive graphs
+
+```{r, fig.align='center', fig.height=3, fig.width=5}
+
+ggplotly(time_series_long_joined %>% 
+    group_by(Country_Region,Date) %>% 
+    summarise_at(c("Confirmed", "Deaths"), sum) %>% 
+    filter (Country_Region == "US") %>% 
+    ggplot(aes(x = Date,  y = Deaths)) + 
+      geom_point() +
+      geom_line() +
+      ggtitle("US COVID-19 Deaths")
+)
+```
+
+```{r, fig.align='center', fig.height=3, fig.width=5}
+US_deaths <- time_series_long_joined %>% 
+    group_by(Country_Region,Date) %>% 
+    summarise_at(c("Confirmed", "Deaths"), sum) %>% 
+    filter (Country_Region == "US")
+ p <- ggplot(data = US_deaths, aes(x = Date,  y = Deaths)) + 
+        geom_point() +
+        geom_line() +
+        ggtitle("US COVID-19 Deaths")
+ggplotly(p)
+
+```
+## Animated Graphs with gganimate

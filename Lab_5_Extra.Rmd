@@ -194,9 +194,14 @@ Create an animated graph of your choosing using the time series data to display 
 
 
 ```{r, fig.width=5, fig.height= 3, fig.align='center'}
+
+
+
+tot_confirmed_sum <- sum(time_series_long_joined$Confirmed)
+tot_deaths_sum <- sum(time_series_long_joined$Deaths)
 Lat_plot_df <-time_series_long_joined%>% 
   group_by(Lat) %>% 
-  summarise(sum_Confirmed= sum(Confirmed), sum_Death= sum(Deaths)) #%>% 
+  summarise(sum_Confirmed= (sum(Confirmed)/tot_confirmed_sum)*100, sum_Death= (sum(Deaths)/tot_deaths_sum)*100) #%>% 
   #pivot_longer(cols = c(sum_Confirmed, sum_Death), names_to="Type", values_to="Number")
 
 #Long_plot_df <-time_series_long_joined%>% 
@@ -207,9 +212,9 @@ Lat_plot_df <-time_series_long_joined%>%
   Lat_plot<-ggplot()+
   #geom_line(data=Long_plot_df, aes(x=Long, y=sum_Confirmed), color="red", show.legend = TRUE)+
   geom_line(data=Lat_plot_df, aes(x=Lat, y=sum_Confirmed), color="blue", show.legend = TRUE)+
-    labs(title="Change of COVID-19 Cases with Latitude",
+    labs(title="Percentage of Total COVID-19 Cases Closer To Equator Is Relatively Low",
          x= "Latitude",
-         y= "Number of Cases")+
+         y= "Percentage of Total Cases")+
     theme_classic()+
     transition_reveal(Lat)
   

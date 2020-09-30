@@ -1,8 +1,10 @@
 ---
 title: "Lab 6"
 output: html_document
+theme: readable
+bibliography: data/lab6_references.bib
 ---
-```{r , echo=FALSE, message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, , echo=FALSE}
 library(tidyverse)
 library(maps)
 library(mapdata)
@@ -194,7 +196,7 @@ df_09_26_2020 <- daily_report %>%
 
 
 
-graph_09_26_2020 <- ggplot(data=df_09_26_2020, aes(x= mean_Long, y=mean_Lat, size=Total_Confirmed/(10^5))) +
+graph_09_26_2020 <- ggplot(data=df_09_26_2020, aes(x= mean_Long, y=mean_Lat, text=Country_Region, size=Total_Confirmed/(10^5))) +
   borders(database = "world", fill = NA, colour = "grey90")+
   theme_bw()+
   geom_point( shape=21 ,fill= 'purple', alpha= 0.5)+
@@ -206,7 +208,7 @@ graph_09_26_2020 <- ggplot(data=df_09_26_2020, aes(x= mean_Long, y=mean_Lat, siz
 
 
 
-graph_09_26_2020
+ggplotly(graph_09_26_2020)
 ```
 
 
@@ -313,4 +315,6 @@ newyork_plot<-ggplot(data=long_lat_added_df)+
 ggplotly(newyork_plot)
 
 ```
+The data was for the report is taken form GitHub page-COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University [@JohnsHopkinsUniversity2020], [@Dong2020]
 
+# REFERENCES

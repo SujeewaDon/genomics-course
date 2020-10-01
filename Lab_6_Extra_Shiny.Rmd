@@ -4,7 +4,7 @@ output: html_document
 runtime: shiny
 ---
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 
 library(shiny)
 library(tidyverse)

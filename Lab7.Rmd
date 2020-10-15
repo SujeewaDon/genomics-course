@@ -10,6 +10,15 @@ library(tidyverse)
 library(tximeta)
 library(magrittr)
 library(DESeq2)
+library(vsn)
+library(dplyr)
+library(ggplot2)
+library(pheatmap)
+library(RColorBrewer)
+library(PoiClaClu)
+library(glmpca)
+library(ggbeeswarm)
+library(apeglm)
 ```
 
 # Using Salmon and tximeta
@@ -183,6 +192,227 @@ nrow(dds)
 
 ## The variance stabilizing transformation and the rlog
 
+For RNA-seq counts variance grows with mean. 
+(Such data principal component analysis (PCA) of such data depends on highest counts as they show highest differences between samples.)
+
+```{r, fig.align='center'}
+lambda <- 10^seq(from=-1, to=2, length=1000)
+cts<- matrix(rpois(1000*100, lambda), ncol=100)
+#library(vsn)
+meanSdPlot(cts, rank=FALSE)
 
 
+
+```
+To avoid the analysis depending on the samples with highest count in PCA analysis  log of normalized counts +1 is used
+
+```{r, fig.align='center'}
+log.cts.one <- log2(cts+1)
+meanSdPlot(log.cts.one, ranks=FALSE)
+
+
+```
+ But this method amplifies the differences when the values are closer to 0.
+ 
+**Resolution**
+
+Stabilizing the variance across mean  using variance stabilizing transformation (VST) for genes with higher counts or regularized-logarithm transformation (rlog) for genes with lower counts
+
+```{r}
+vsd <- vst(dds, blind=FALSE)
+head(assay(vsd),3)
+colData(vsd)
+
+
+rld <- rlog(dds, blind=FALSE)
+head(assay(rld),3)
+```
+blind = FALSE  means that differences between
+cell lines and treatment (the variables in the design) will not contribute to the expected variance mean
+trend of the experiment.
+
+fully unsupervised
+transformation, one can set blind = TRUE
+
+
+Showing the effect of transformation
+
+```{r, fig.align='center'}
+
+#library("dplyr")
+#library("ggplot2")
+dds <- estimateSizeFactors(dds)
+df <- bind_rows(
+as_data_frame(log2(counts(dds, normalized=TRUE)[, 1:2]+1)) %>%
+mutate(transformation = "log2(x + 1)"),
+as_data_frame(assay(vsd)[, 1:2]) %>% mutate(transformation = "vst"),
+as_data_frame(assay(rld)[, 1:2]) %>% mutate(transformation = "rlog"))
+colnames(df)[1:2] <- c("x", "y")
+lvls <- c("log2(x + 1)", "vst", "rlog")
+df$transformation <- factor(df$transformation, levels=lvls)
+ggplot(df, aes(x = x, y = y)) + geom_hex(bins = 80) +
+coord_fixed() + facet_grid( . ~ transformation)
+```
+
+## Sample Distances
+
+dist()- calculates the Euclidean distance between samples (in rows)
+
+
+```{r}
+sampleDists <-  dist(t(assay(vsd)))
+
+sampleDists
+
+```
+Visualizing the distances using heat maps
+
+1. 
+```{r, fig.align='center'}
+#library(pheatmap)
+#library(RColorBrewer)
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste( vsd$dex, vsd$cell, sep = " - " )
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+pheatmap(sampleDistMatrix,
+clustering_distance_rows = sampleDists,
+clustering_distance_cols = sampleDists,
+col = colors)
+
+```
+
+
+2. Calculating the distances using  Poisson Distance
+
+This method gets variance of counts into consideration when calculating the distance between samples
+
+```{r, fig.align='center'}
+#library(PoiClaClu)
+poisd <- PoissonDistance(t(counts(dds)))
+
+samplePoisDistMatrix <- as.matrix( poisd$dd )
+rownames(samplePoisDistMatrix) <- paste( dds$dex, dds$cell, sep=" - " )
+colnames(samplePoisDistMatrix) <- NULL
+pheatmap(samplePoisDistMatrix,
+clustering_distance_rows = poisd$dd,
+clustering_distance_cols = poisd$dd,
+col = colors)
+```
+
+3. a) PCA plot
+
+```{r, fig.align='center'}
+plotPCA(vsd, intgroup = c("dex", "cell"))
+```
+
+  b) PCA plot using ggplot
+
+```{r, fig.align='center'}
+pcaData <- plotPCA(vsd, intgroup = c( "dex", "cell"), returnData = TRUE)
+pcaData
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData, aes(x = PC1, y = PC2, color = dex, shape = cell)) +
+geom_point(size =3) +
+xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+coord_fixed() +
+ggtitle("PCA with VST data")
+```
+  c) PCA plot using Generalized PCA
+
+
+```{r, fig.align='center'}
+#library("glmpca")
+gpca <- glmpca(counts(dds), L=2)
+gpca.dat <- gpca$factors
+gpca.dat$dex <- dds$dex
+gpca.dat$cell <- dds$cell
+
+ggplot(gpca.dat, aes(x = dim1, y = dim2, color = dex, shape = cell)) +
+geom_point(size =3) + coord_fixed() + ggtitle("glmpca - Generalized PCA")
+```
+4. a) Multidimensional scaling (MDS) plots.
+
+This is done when no matrix data is available but matrix of distance is available.
+
+```{r, fig.align='center'}
+mds <- as.data.frame(colData(vsd)) %>%
+cbind(cmdscale(sampleDistMatrix))
+ggplot(mds, aes(x = `1`, y = `2`, color = dex, shape = cell)) +
+geom_point(size = 3) + coord_fixed() + ggtitle("MDS with VST data")
+```
+  b) MDS plotting with VST data
+  
+```{r, fig.align='center'}
+mdsPois <- as.data.frame(colData(dds)) %>%
+cbind(cmdscale(samplePoisDistMatrix))
+ggplot(mdsPois, aes(x = `1`, y = `2`, color = dex, shape = cell)) +
+geom_point(size = 3) + coord_fixed() + ggtitle("MDS with PoissonDistances")
+```
+  
+# Differential Expression Analysis
+
+```{r}
+dds <-DESeq(dds)
+res <- results(dds)
+res <- results(dds, contrast=c("dex","trt","untrt"))
+mcols(res, use.names = TRUE)
+summary(res)
+res.05 <- results(dds, alpha = 0.05)
+table(res.05$padj < 0.05)
+resLFC1 <- results(dds, lfcThreshold=1)
+table(resLFC1$padj < 0.1)
+```
+## Other Comparisons
+
+```{r}
+results(dds, contrast = c("cell", "N061011", "N61311"))
+```
+## Multiple testing
+
+```{r}
+sum(res$pvalue < 0.05, na.rm=TRUE)
+sum(!is.na(res$pvalue))
+sum(res$padj < 0.1, na.rm=TRUE)
+resSig <- subset(res, padj < 0.1)
+head(resSig[ order(resSig$log2FoldChange), ])
+
+head(resSig[ order(resSig$log2FoldChange, decreasing = TRUE), ])
+```
+## Plotting Results
+
+1. Counts plot
+
+  a) Plotting using plotCounts
+```{r, fig.align='center'}
+topGene <- rownames(res)[which.min(res$padj)]
+plotCounts(dds, gene = topGene, intgroup=c("dex"))
+```
+  b) Plotting using ggplot
+  
+```{r, fig.align='center'}
+#library("ggbeeswarm")
+geneCounts <- plotCounts(dds, gene = topGene, intgroup = c("dex","cell"),
+returnData = TRUE)
+ggplot(geneCounts, aes(x = dex, y = count, color = cell)) +
+scale_y_log10() + geom_beeswarm(cex = 3)
+
+ggplot(geneCounts, aes(x = dex, y = count, color = cell, group = cell)) +
+scale_y_log10() + geom_point(size = 3) + geom_line()
+```
+2. MA-plot
+
+MA-plot provides a useful overview for the distribution of the estimated
+coefficients in the model, e.g. the comparisons of interest, across all genes.
+
+
+```{r}
+#library("apeglm")
+resultsNames(dds)
+res <- lfcShrink(dds, coef="dex_trt_vs_untrt", type="apeglm")
+plotMA(res, ylim = c(-5, 5))
+```
 

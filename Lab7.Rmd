@@ -1,6 +1,7 @@
 ---
-title: "Lab7.Rmd"
+title: "RNA-seq workflow: gene-level exploratory analysis and differential expression"
 output: html_document
+theme: readable
 ---
 
 ```{r, echo=FALSE, message=FALSE}
@@ -156,6 +157,32 @@ DESeqDataSetFromMatrix(countData = countdata,
 ```
 
 ## Pre-filtering data set
+
+Filter the rows with counts greater than zeros, or one accross all samples
+
+counts()-
+The counts slot holds the count data as a matrix of non-negative integer count values, one row for each observational unit (gene or the like), and one column for each sample.
+
+```{r}
+nrow(dds)
+keep <- rowSums(counts(object = dds))>1
+dds <-dds[keep,]
+nrow(dds)
+```
+
+Filter the rows with at least 3 samples have a count of 10 or higher
+
+```{r}
+keep <- rowSums(counts(object=dds)>=10)>=3
+
+dds <- dds[keep,]
+nrow(dds)
+```
+
+
+
+## The variance stabilizing transformation and the rlog
+
 
 
 

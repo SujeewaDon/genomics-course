@@ -19,6 +19,15 @@ library(PoiClaClu)
 library(glmpca)
 library(ggbeeswarm)
 library(apeglm)
+library(genefilter)
+library(IHW) #from bioconductor
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+library(ReportingTools)
+library(Gviz)
+library(sva)
+library(RUVSeq)
+library(fission)
 ```
 
 # Using Salmon and tximeta
@@ -414,5 +423,287 @@ coefficients in the model, e.g. the comparisons of interest, across all genes.
 resultsNames(dds)
 res <- lfcShrink(dds, coef="dex_trt_vs_untrt", type="apeglm")
 plotMA(res, ylim = c(-5, 5))
+```
+The above plot without removing the noisy log2 fold change 
+
+```{r}
+res.noshr <- results(dds, name="dex_trt_vs_untrt")
+plotMA(res.noshr, ylim = c(-5, 5))
+```
+Labeling individual points
+
+```{r}
+plotMA(res, ylim = c(-5,5))
+topGene <- rownames(res)[which.min(res$padj)]
+with(res[topGene, ], {
+points(baseMean, log2FoldChange, col="dodgerblue", cex=2, lwd=2)
+text(baseMean, log2FoldChange, topGene, pos=2, col="dodgerblue")
+})
+```
+3. Histogram
+
+```{r}
+hist(res$pvalue[res$baseMean > 1], breaks = 0:20/20,
+col = "grey50", border = "white")
+```
+# Gene Clustering
+
+eg. Plotting 20 genes with the highest variance across samples
+
+```{r}
+#library("genefilter")
+topVarGenes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 20)
+
+mat <- assay(vsd)[ topVarGenes, ]
+mat <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(vsd)[, c("cell","dex")])
+pheatmap(mat, annotation_col = anno)
+```
+# Independant filtering
+
+```{r}
+qs <- c(0, quantile(resLFC1$baseMean[resLFC1$baseMean > 0], 0:6/6))
+bins <- cut(resLFC1$baseMean, qs)
+levels(bins) <- paste0("~", round(signif((qs[-1] + qs[-length(qs)])/2, 2)))
+fractionSig <- tapply(resLFC1$pvalue, bins, function(p)
+mean(p < .05, na.rm = TRUE))
+barplot(fractionSig, xlab = "mean normalized count",
+ylab = "fraction of small p values")
+```
+# Independant hypothesis weighing
+
+The idea of p value filtering is to weight hypotheses to optimize power. It can be done as shown below.
+```{r}
+#library("IHW")
+res.ihw <- results(dds, filterFun=ihw)
+```
+
+
+# Annotating and exporting results
+
+library(org.Hs.eg.db) is the organism annotation package (“org”) for Homo sapiens (“Hs”), organized as an
+AnnotationDbi database package (“db”), using Entrez Gene IDs (“eg”) as primary key
+```{r}
+#library(AnnotationDbi)
+#library(org.Hs.eg.db)
+columns(org.Hs.eg.db)
+```
+
+mapIds()- add individual columns to result table
+
+a) Add genesymbol
+```{r}
+ens.str <- substr(rownames(res), 1, 15)
+res$symbol <- mapIds(org.Hs.eg.db,
+keys=ens.str,
+column="SYMBOL",
+keytype="ENSEMBL",
+multiVals="first")
+res$entrez <- mapIds(org.Hs.eg.db,
+keys=ens.str,
+column="ENTREZID",
+keytype="ENSEMBL",
+multiVals="first")
+```
+b) add entrez id
+
+```{r}
+res$entrez <- mapIds(org.Hs.eg.db,
+keys=ens.str,
+column="ENTREZID",
+keytype="ENSEMBL",
+multiVals="first")
+```
+The results
+```{r}
+resOrdered <- res[order(res$pvalue),]
+head(resOrdered)
+```
+# Exporting Results1) 
+1) Saving as data frames
+```{r}
+resOrderedDF <- as.data.frame(resOrdered)[1:100, ]
+write.csv(resOrderedDF, file = "Results/RNASEQ_results.csv")
+```
+
+2) Saving as dynamic html with external data base links, gene identifies and box plots withnormalized counts
+
+```{r, eval=FALSE}
+#library(ReportingTools)
+htmlRep <- HTMLReport(shorthname= "report", title = "My report", )
+
+htmlRep <- HTMLReport(shortName="report", title="My report",
+reportDirectory="./report")
+publish(resOrderedDF, htmlRep)
+url <- finish(htmlRep)
+browseURL(url)
+```
+
+# Plotting fold changes in genomic space
+
+```{r}
+resGR <- lfcShrink(dds=dds, coef="dex_trt_vs_untrt", type="apeglm", format="GRanges")
+resGR
+
+ens.str <- substr(names(resGR), 1, 15)
+resGR$symbol <- mapIds(org.Hs.eg.db, ens.str, "SYMBOL", "ENSEMBL")
+
+```
+
+
+```{r}
+#library(Gviz)
+
+
+window <- resGR[topGene] + 1e6
+strand(window) <- "*"
+resGRsub <- resGR[resGR %over% window]
+naOrDup <- is.na(resGRsub$symbol) | duplicated(resGRsub$symbol)
+resGRsub$group <- ifelse(naOrDup, names(resGRsub), resGRsub$symbol)
+```
+
+
+#
+
+Specifying a window of 1 million base pairs upstream and downstream
+from the gene with the smallest p value.
+
+
+```{r}
+#library("Gviz")
+window <- resGR[topGene] + 1e6
+strand(window) <- "*"
+resGRsub <- resGR[resGR %over% window]
+naOrDup <- is.na(resGRsub$symbol) | duplicated(resGRsub$symbol)
+resGRsub$group <- ifelse(naOrDup, names(resGRsub), resGRsub$symbol)
+
+status <- factor(ifelse(resGRsub$padj < 0.05 & !is.na(resGRsub$padj),
+"sig", "notsig"))
+
+options(ucscChromosomeNames = FALSE)
+g <- GenomeAxisTrack()
+a <- AnnotationTrack(resGRsub, name = "gene ranges", feature = status)
+d <- DataTrack(resGRsub, data = "log2FoldChange", baseline = 0,
+type = "h", name = "log2 fold change", strand = "+")
+plotTracks(list(g, d, a), groupAnnotation = "group",
+notsig = "grey", sig = "hotpink")
+```
+
+
+# Using SVA with DESeq2
+
+Recovering an batch effects by obtaining a matrix of normalized counts for which the average count across the samples is larger than 1
+
+```{r}
+dat <- counts(dds, normalized = TRUE)
+idx <- rowMeans(dat) > 1
+dat <- dat[idx, ]
+mod <- model.matrix(~ dex, colData(dds))
+mod0 <- model.matrix(~ 1, colData(dds))
+svseq <- svaseq(dat, mod, mod0, n.sv = 2)
+
+svseq$sv
+
+par(mfrow = c(2, 1), mar = c(3,5,3,1))
+for (i in 1:2) {
+stripchart(svseq$sv[, i] ~ dds$cell, vertical = TRUE, main = paste0("SV", i))
+abline(h = 0)
+}
+
+ddssva <- dds
+ddssva$SV1 <- svseq$sv[,1]
+ddssva$SV2 <- svseq$sv[,2]
+design(ddssva) <- ~ SV1 + SV2 + dex
+```
+
+
+# Usng RUV with DESeq2
+
+Detecting hidden batch effects
+RUVg()- Estimates factors of unwanted variation
+
+```{r}
+#library(RUVSeq)
+set <- newSeqExpressionSet(counts(dds))
+idx <- rowSums(counts(set) > 5) >= 2
+set <- set[idx, ]
+set <- betweenLaneNormalization(set, which="upper")
+not.sig <- rownames(res)[which(res$pvalue > .1)]
+empirical <- rownames(set)[ rownames(set) %in% not.sig ]
+set <- RUVg(set, empirical, k=2)
+pData(set)
+
+par(mfrow = c(2, 1), mar = c(3,5,3,1))
+for (i in 1:2) {
+stripchart(pData(set)[, i] ~ dds$cell, vertical = TRUE, main = paste0("W",
+i))
+abline(h = 0)
+}
+```
+Above unwanted variation plotted over cell line is added to DESeqData Set and design
+
+```{r}
+ddsruv <- dds
+ddsruv$W1 <- set$W_1
+ddsruv$W2 <- set$W_2
+design(ddsruv) <- ~ W1 + W2 + dex
+```
+
+
+# Time course experiments
+
+```{r}
+# library(fission)
+data (fission)
+ddsTC <- DESeqDataSet(fission, ~ strain + minute + strain:minute)
+```
+
+Remove the strain specific differences over time in fission data set
+```{r}
+ddsTC <- DESeq(ddsTC, test="LRT", reduced = ~ strain + minute)
+resTC <- results(ddsTC)
+resTC$symbol <- mcols(ddsTC)$symbol
+head(resTC[order(resTC$padj),], 4)
+
+
+
+```
+Model the counts as a smooth function over time and to include an interaction term of the condition with smooth function
+
+```{r}
+fiss <- plotCounts(ddsTC, which.min(resTC$padj),
+intgroup = c("minute","strain"), returnData = TRUE)
+fiss$minute <- as.numeric(as.character(fiss$minute))
+ggplot(fiss,
+aes(x = minute, y = count, color = strain, group = strain)) +
+geom_point() + stat_summary(fun.y=mean, geom="line") +
+scale_y_log10()+
+  labs(title="Normalized counts for a gene with condition-specific changes over time.")
+```
+Wald test for the log2 fold changes at individual time points can be investigated sing the test argument to results
+
+```{r}
+resultsNames(ddsTC)
+res30 <- results(ddsTC, name="strainmut.minute30", test="Wald")
+res30[which.min(resTC$padj),]
+```
+
+Clustering significant genes by their profiles
+
+```{r}
+betas <- coef(ddsTC)
+colnames(betas)
+
+topGenes <- head(order(resTC$padj),20)
+mat <- betas[topGenes, -c(1,2)]
+thr <- 3
+mat[mat < -thr] <- -thr
+mat[mat > thr] <- thr
+pheatmap(mat, breaks=seq(from=-thr, to=thr, length=101),
+cluster_col=FALSE)
+```
+Obtaining the version numbers of R and all the packages used in this session
+```{r}
+sessionInfo()
 ```
 

@@ -1,0 +1,78 @@
+---
+title: "Sequence Alignment, Phylogenetic Analysis and Tree Visualization"
+output: html_document
+---
+
+
+```{r, message=FALSE}
+library(tidyverse)
+library(ggtree)
+```
+
+
+
+## Visualizing and Annotating PhylogeneticTrees with R+ggtree
+
+Horizontal dimension- genetic change
+branches- evolutionary lineages changing over time (longer the branch larger the change)
+units- nucleotide substitutions per site
+
+```{r}
+tree <- read.tree("data/tree_newick.nwk")
+tree
+
+tree %>% ggplot()+
+  geom_tree()+
+  theme_tree()+
+  labs(title="Plotting with ggplot")
+
+tree %>% ggtree()+
+  theme_tree2()+
+  labs(title="Phylogram")
+
+tree %>% ggtree(branch.length = "none") +labs(title= "Cladogram")
+
+tree %>% ggtree(branch.length = "none", color="blue", size= 2, linetype=3) +
+  labs(title= "Cladogram with aes")
+
+```
+
+## ** Exercise 1**
+
+1. Create a slanted phylogenetic tree.
+```{r}
+
+tree %>% ggtree(layout = "slanted")+
+  theme_tree2()
+```
+2. Create a circular phylogenetic tree
+```{r}
+tree %>% ggtree(layout = "circular")+
+  theme_tree2()
+```
+
+3. Create a circular unscaled cladogram with thick red lines
+
+```{r}
+tree %>% ggtree(branch.length = "none", color="red", layout = "circular", linetype=1, size=1)
+```
+
+```{r}
+p <- tree %>% ggtree()+
+  geom_nodepoint()+
+  geom_tippoint()+
+  geom_tiplab()
+print(p)
+```
+## ** Exercise 2**
+
+
+```{r}
+p <- tree %>% ggtree()+
+  geom_nodepoint(alpha=0.5, size=2.5, color="orange")+
+  geom_tippoint(shape=23, fill="red", color="red")+
+  geom_tiplab(color= "purple")+
+  ggtitle("Phylogenetic Aesthetics")
+print(p)
+```
+

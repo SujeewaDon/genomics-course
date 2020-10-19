@@ -75,4 +75,49 @@ p <- tree %>% ggtree()+
   ggtitle("Phylogenetic Aesthetics")
 print(p)
 ```
+## Internal Node Number
+
+```{r}
+tree %>% ggtree()+
+  geom_text(aes(label=node), hjust=-.3)
+```
+Most recent common ancestor (MRCA)
+
+Finding th emost recent common ancestor between C and E
+```{r}
+tree %>% ggtree()+
+  geom_tiplab()
+
+MRCA(tree, .node1="C",.node2 ="E")
+
+MRCA(tree, .node1="G",.node2 ="H")
+
+
+```
+## Labeling Clades
+
+Annotating the most recent common ancestor between taxa C and E
+```{r}
+tree %>% ggtree()+
+  #geom_tiplab()+
+   #geom_text(aes(label=node), hjust=-.3)+
+  geom_cladelabel(node=17, label="Label for clade from node 17", color = "red")
+```
+
+```{r}
+tree %>% ggtree()+
+  geom_tiplab()+
+   #geom_text(aes(label=node), hjust=-.3)+
+  geom_cladelabel(node=17, label="Label for clade from node 17", color = "red", offset=1)
+```
+
+Adding another clade label connecting taxa G and H (node 21)
+
+```{r}
+tree %>% ggtree()+
+  geom_tiplab()+
+   #geom_text(aes(label=node), hjust=-.3)+
+  geom_cladelabel(node=17, label="Label for clade from node 17", color = "red", offset=1)+
+  geom_cladelabel(node=21, label="Label for clade from node 17", color = "red", offset=1)
+```
 

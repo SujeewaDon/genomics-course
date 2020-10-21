@@ -9,7 +9,20 @@ library(tidyverse)
 library(ggtree)
 ```
 
+# Exercise
 
+1. Use NGPhylogeny.fr to analysis the set of rRNA sequence provided. Describe the methods and put the.png file from your analysis into your Lab 8 .Rmd file
+
+
+![](Images/tree_00_Lab8.png){width=25%}
+```{r}
+
+```
+
+3. Go through the tutorial on
+Visualizing and Annotating Phylogenetic Trees with R+ggtree
+(https://4va.github.io/biodatasci/r-ggtree.html)
+adding the steps to your .Rmd 􀃝le.
 
 ## Visualizing and Annotating PhylogeneticTrees with R+ggtree
 
@@ -117,7 +130,62 @@ Adding another clade label connecting taxa G and H (node 21)
 tree %>% ggtree()+
   geom_tiplab()+
    #geom_text(aes(label=node), hjust=-.3)+
-  geom_cladelabel(node=17, label="Label for clade from node 17", color = "red", offset=1)+
-  geom_cladelabel(node=21, label="Label for clade from node 17", color = "red", offset=1)
+  geom_cladelabel(node=17, label="Label for clade from node 17", color = "red", offset=1, align=TRUE)+
+  geom_cladelabel(node=21, label="Label for clade from node 17", color = "red", offset=1, align=TRUE)+
+  theme_tree2()+
+  xlim(0,70)+
+  theme_tree()
+  
+```
+##Highlighting a clade
+
+```{r}
+tree %>% ggtree()+
+  geom_tiplab()+
+  geom_highlight(node=17, fill="gold")+
+  geom_highlight(node=21, fill="purple")
 ```
 
+## Connecting Taxa
+
+```{r}
+tree %>% ggtree()+
+  geom_tiplab()+
+  geom_taxalink("E", "H", color="blue3")+
+  geom_taxalink("C", "G", color="orange2", curvature=-.9)
+```
+
+## **Exercise 3**
+
+First, find what the MRCA is for taxa B+C, and taxa L+J. You can do this in one of two ways:
+Easiest: use MRCA(tree, tip=c("taxon1", "taxon2")) for B/C and L/J separately.
+
+```{r}
+BC_MRCA <-MRCA(tree, .node1="B", .node2 = "C")
+
+print(paste("MRCA of BC = ", BC_MRCA))
+
+
+LJ_MRCA <-MRCA(tree, .node1="L", .node2 = "J")
+
+print(paste("MRCA of LJ = ", LJ_MRCA))
+
+```
+
+
+
+```{r}
+tree %>% ggtree()+
+  geom_tiplab()+
+  geom_highlight(node = 19, fill ="gold")+
+  geom_highlight(node = 23, fill ="skyblue")+
+  geom_cladelabel(node=17,  label= "Superclade (node 17)", color= "gold", offset=0.8)+
+  geom_taxalink("C", "E", color="grey", linetype=2)+
+  geom_taxalink("G", "J", color="grey", linetype=2)+
+  theme_tree2()+
+  labs(title= " The phylogenetic tree for exercise 3")
+  
+
+```
+
+# Advanced Tree Annotations

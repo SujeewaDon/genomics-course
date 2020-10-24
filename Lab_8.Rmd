@@ -7,6 +7,8 @@ output: html_document
 ```{r, message=FALSE}
 library(tidyverse)
 library(ggtree)
+library(treeio)
+library(ggimage)
 ```
 
 # Exercise
@@ -15,14 +17,13 @@ library(ggtree)
 
 
 ![](Images/tree_00_Lab8.png){width=25%}
-```{r}
 
-```
+
 
 3. Go through the tutorial on
 Visualizing and Annotating Phylogenetic Trees with R+ggtree
 (https://4va.github.io/biodatasci/r-ggtree.html)
-adding the steps to your .Rmd 􀃝le.
+adding the steps to your .Rmd file.
 
 ## Visualizing and Annotating PhylogeneticTrees with R+ggtree
 
@@ -189,3 +190,101 @@ tree %>% ggtree()+
 ```
 
 # Advanced Tree Annotations
+
+Plotting BEAST (Bayesian Evolutionary Analysis Sampling Trees) data
+
+```{r, fig.width=10, fig.height= 20, fig.align='center'}
+tree <- read.beast("data/flu_tree_beast.tree")
+
+ggtree(tree, mrsd="2013-01-01")+
+  theme_tree2()+
+  geom_tiplab(align = TRUE, linesize =  0.5)+
+  xlim(1990,2020)
+```
+# Putting multiple sequence alignment and phylogenetic tree side by side
+
+```{r}
+msaplot(p=ggtree(tree), fasta= "data/flu_aasequence.fasta", window= c(150, 175))
+```
+
+
+## Facet ggtree plots
+
+```{r}
+set.seed(42)
+trees <- lapply(rep(c(10,25,50,100),3), rtree)
+class(trees) <- "multiPhylo"
+
+ggtree(trees) + 
+  facet_wrap( ~.id, scale= "free", ncol=4)+
+  ggtitle("Facet Phylogenetic Trees")
+```
+
+
+# Plotting tree with other data
+
+```{r}
+# Generating a random tree with 30 tips
+tree <- rtree(30)
+
+
+# Make the original plot
+p <- ggtree(tree)
+
+# Generating data for a 2nd plot
+d1 <- data.frame(id=tree$tip.label, val=rnorm(30, sd=3))
+
+# Making a second plot
+p2 <- facet_plot(p, panel="dot", data=d1, geom=geom_point, aes(x=val), color='red3')
+
+
+# Generating data for a 3rd plot
+d2 <- data.frame(id=tree$tip.label, value = abs(rnorm(30, mean=100, sd=50)))
+
+
+# Generating the third plot 
+p3 <- facet_plot(p2, panel='bar', data=d2, geom=geom_segment, 
+           aes(x=0, xend=value, y=y, yend=y), size=3, color='blue4') 
+
+
+# Plotting all three with a scale
+
+p3+ theme_tree2()
+
+```
+
+# Overlaying organism silouhettes
+
+
+
+```{r}
+newick <- "((Pongo_abelii,(Gorilla_gorilla_gorilla,(Pan_paniscus,Pan_troglodytes)Pan,Homo_sapiens)Homininae)Hominidae,Nomascus_leucogenys)Hominoidea;"
+
+
+tree <- read.tree(text=newick)
+d <- ggimage::phylopic_uid(tree$tip.label)
+
+d$body_mass = c(52, 114, 47, 45, 58, 6)
+  
+p <- ggtree(tree) %<+% d + 
+  geom_tiplab(aes(image=uid, colour=body_mass), geom="phylopic", offset=2.5) +
+  geom_tiplab(aes(label=label), offset = .2) + xlim(NA, 7) +
+  scale_color_viridis_c()
+p  
+
+```
+
+
+4. Upload your tree file from the FastTreeMP output on CIPRES into R using treeio. Using ggtree to make the tree images, coloring the tree according to the domains of life.
+
+```{r}
+my_tree <- read.tree("data/Lab_8_fastree_result.tre")
+
+ggtree(my_tree, layout = "circular", branch.length = "none")+
+  #geom_nodelab()+
+  geom_tiplab(hjust =-.1, size=3)+
+  xlim(0, 36)+
+  geom_highlight(node=30, fill ="gold", extend = 0.5)+
+   geom_highlight(node=25, fill ="purple", extend = 0.5)+
+  geom_highlight(node=36, fill ="skyblue", extend = 0.5)
+```

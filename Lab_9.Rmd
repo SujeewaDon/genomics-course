@@ -1,0 +1,49 @@
+---
+title: "Programming in R - Regular Expressions"
+output: html_document
+Theme: readable
+---
+
+```{r, message=FALSE}
+library(stringr)
+library(tidyverse)
+```
+
+
+# Basic Matches
+
+1. Matching exact strings
+```{r, message=FALSE}
+x<- c("apple", "banana", "pear")
+
+str_view(x,"an")
+
+
+```
+2. Matching any character.
+shows only first match in a string). Here, any thing that surrounds the letter a wil be matched 
+```{r, message=FALSE}
+str_view(x, ".a.")
+```
+3. Matching a "." (dot) 
+
+```{r, message=FALSE}
+dot <- "\\."
+writeLines(dot)
+x<- c("abc", "a.c", "bef")
+str_view(x, "a\\.c")
+```
+4. Matching a "\" (escape)
+
+```{r, message=FALSE}
+x<- "a\\b"
+writeLines(x)
+str_view(x, "\\\\")
+```
+
+### **Exercise**
+
+```{r, message=FALSE}
+
+```
+

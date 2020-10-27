@@ -43,7 +43,241 @@ str_view(x, "\\\\")
 
 ### **Exercise**
 
+1. Explain why each of these strings don’t match a \: "\", "\\", "\\\".
+
 ```{r, message=FALSE}
 
+writeLines("Answer-\\  escapes special behaviour of \\ hence wont match \\. \\\\  escapes special behaviour and escapes symbol. \\\\\\ is three slashes and wont match \\")
+```
+
+2. How would you match the sequence "'\?
+
+```{r, message=FALSE}
+x<- x<- "\'\\"
+writeLines(x)
+```
+
+3. What patterns will the regular expression \..\..\.. match? How would you represent it as a string?
+
+```{r, message=FALSE}
+x<- "\\..\\..\\.."
+writeLines(x)
+```
+
+# Anchors
+
+4. Matching from the start of a string
+
+eg: Matching words starting with "a"
+
+```{r}
+x<- c("apple", "banana", "pear")
+
+str_view(x,"^a")
+```
+5. Matching from the end of a string. 
+
+eg: Matching words ending with "a"
+
+```{r}
+str_view(x, "a$")
+```
+6. Matching a complete string from start to end.
+eg: matching "apple"
+
+```{r}
+x<- c("apple pie", "apple", "apple cake" )
+str_view(x, "apple")
+str_view(x, "^apple$")
+```
+### ***Exercise***
+
+1. How would you match the literal string "$^$"?
+```{r}
+x <- "$^$"
+str_view(x, "\\$\\^\\$")
+```
+2. Given the corpus of common words in stringr::words, create regular expressions that find all words that:
+Start with “y”.
+
+
+
+```{r}
+str_view(stringr::words, "^y", match = TRUE)
+```
+
+End with “x”
+
+
+```{r}
+str_view(stringr::words, "x$", match = TRUE)
+```
+
+
+Are exactly three letters long. (Don’t cheat by using str_length()!)
+
+```{r}
+str_view(stringr::words, "^...$", match = TRUE)
+```
+
+
+Have seven letters or more.
+
+```{r}
+str_view(stringr::words, "^.......", match = TRUE)
+```
+
+# Character classes and alternatives
+
+7. Matching a dot containing word using charcater class rather than "\\."
+
+```{r}
+x<- c("abc", "a.c", "a*c", "a c")
+str_view(x,"a[.]c")
+```
+
+
+```{r}
+str_view(x, ".[*]c")
+```
+
+```{r}
+str_view(x, "a[ ]")
+```
+
+8. Picking between one or more alternative patterns
+
+```{r}
+x <- c("grey", "gray", "grty")
+str_view(x,"gr(e|a|t)y")
+```
+
+### ***Exercise***
+
+1. Create regular expressions to find all words that:
+
+Start with a vowel.
+```{r}
+str_view(stringr::words, "^[aeiou]", match = TRUE)
+```
+That only contain consonants. (Hint: thinking about matching “not”-vowels.)
+
+```{r}
+str_view(stringr::words, "^[^aeiou]", match = TRUE)
+```
+
+End with ed, but not with eed.
+
+```{r}
+str_view(stringr::words, "[^e]ed$", match = TRUE)
+```
+End with ing or ise
+
+```{r}
+str_view(stringr::words, "(ing|ise)$", match=TRUE)
+```
+2. Empirically verify the rule “i before e except after c”.
+```{r}
+ str_view(stringr::words, "ie & ^ci", match = TRUE)
+```
+
+3. Is “q” always followed by a “u”?
+
+Answer-Yes
+```{r}
+str_view(stringr::words, "uq", match = TRUE)
+```
+
+4. Write a regular expression that matches a word if it’s probably written in British English, not American English
+
+```{r}
+
+```
+
+
+5. Create a regular expression that will match telephone numbers as commonly written in your country.
+
+```{r}
+x <- c(4133333413, 8457777777, 413) 
+str_view(x, "^413.......")
+```
+# Repetition
+
+9. Matching a pattern 0 or 1 times.
+eg: Match "CC" in the string x
+
+```{r}
+x <- "1888 is the longest year in Roman numerals: MDCCCLXXXVIII,  CCCCCLLLLXXXX, ccCCCLX"
+str_view(x, "CC?")
+
+```
+
+10. Matching a pattern 1 or more times
+
+eg: Match "CC" in x
+
+```{r}
+str_view(x, "CC+")
+```
+
+11. Matching a pattern 0 or more time.
+eg: Matching "CLX" in x
+
+```{r}
+str_view(x, "C[LX]+")
+```
+
+12. Matching exactly n matches
+
+eg: Match "C" twice in x
+
+```{r}
+str_view(x, "C{2}")
+```
+
+13. Match n or more matches
+eg: Match more than 2C s in x
+
+```{r}
+str_view(x, "C{2,}")
+```
+
+
+```{r}
+str_view(x,"C{2,}?")
+```
+Matching a string between two repititions 
+eg: matching "C" between 2-3 repititions
+
+```{r}
+str_view(x, "C{2,3}")
+```
+
+
+```{r}
+str_view(x, "C[LX]+?")
+```
+
+
+### ***Exercises***
+
+1. Describe the equivalents of ?, +, * in {m,n} form
+
+? = {n}
++ = {2, }
+* = 
+{m,n}
+
+2. Describe in words what these regular expressions match: (read carefully to see if I’m using a regular expression or a string that defines a regular expression.)
+^.*$- word exactly starting with a dot and ends with star
+"\\{.+\\}"
+\d{4}-\d{2}-\d{2}
+"\\\\{4}"
+
+```{r}
+writeLines("^.*$")
+writeLines("\\{.+\\}")
+
+writeLines("\\\\{4}")
 ```
 

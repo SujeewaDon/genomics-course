@@ -41,7 +41,7 @@ writeLines(x)
 str_view(x, "\\\\")
 ```
 
-### **Exercise**
+### **Exercise 14.3.1.1**
 
 1. Explain why each of these strings don’t match a \: "\", "\\", "\\\".
 
@@ -152,7 +152,7 @@ x <- c("grey", "gray", "grty")
 str_view(x,"gr(e|a|t)y")
 ```
 
-### ***Exercise***
+### ***Exercise 14.3.3.1***
 
 1. Create regular expressions to find all words that:
 
@@ -263,10 +263,10 @@ str_view(x, "C[LX]+?")
 
 1. Describe the equivalents of ?, +, * in {m,n} form
 
-? = {n}
-+ = {2, }
-* = 
-{m,n}
+? = {0,1}
++ = {1, }
+* = {0,}
+
 
 2. Describe in words what these regular expressions match: (read carefully to see if I’m using a regular expression or a string that defines a regular expression.)
 ^.*$- word exactly starting with a dot and ends with star
@@ -279,5 +279,25 @@ writeLines("^.*$")
 writeLines("\\{.+\\}")
 
 writeLines("\\\\{4}")
+```
+
+3.Create regular expressions to find all words that:
+
+Start with three consonants.
+
+```{r}
+str_view(stringr::words, "^[^aeiou]{3}", match = TRUE)
+```
+
+Have three or more vowels in a row.
+
+```{r}
+str_view(stringr::words, "[aeiou]{3,}", match = TRUE)
+```
+Have two or more vowel-consonant pairs in a row.
+
+```{r}
+#str_view(, "[aeiou][^aeiou]+?", match = TRUE)
+str_view(stringr::words, "([aeiou][^aeiou]){2,}", match = TRUE)
 ```
 

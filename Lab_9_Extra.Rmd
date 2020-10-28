@@ -1,4 +1,173 @@
 ---
-title: "Lab9_x.Rmd"
+title: "Programming in R - Control Structures and Functions"
 output: html_document
+Theme: readable
 ---
+
+
+# Control Structures
+
+## Conditional statements with if-else
+
+```{r}
+x <- runif(1,0,10)
+if (x>3){
+  y <- 10
+} else {
+  y<-0
+}
+
+print(paste("x =", x))
+print(paste("y =", y))
+```
+
+## Important Operators
+
+### for Loops
+
+```{r}
+for(i in 1:10){
+  print(i)
+}
+```
+
+
+```{r}
+x <- c("a", "b", "c", "d")
+for (i in 1:4){
+  print(x[i])
+}
+```
+
+
+### seq_along
+
+```{r}
+for (i in seq_along(x)){
+  print(paste("object = ", x[i], ", index = ", i, sep=""))
+}
+```
+
+
+```{r}
+for (letter in x){
+  print(paste("object = ", letter, ", index = ", which(x==letter), sep=""))
+}
+```
+
+ for one line loop the curly braces are not necessary
+```{r}
+for (i in 1:4) print(paste("object is ", x[i], "index is", i ,sep=" "))
+```
+
+### Nested for loops
+
+Nesting beyond 2 to 3 levels often makes it dicult to read/understand the code
+```{r}
+x<- matrix(1:6, 2,3)
+for (i in seq_len(nrow(x))){
+  for(j in seq_len(ncol(x))){
+    print(paste ("row =", i, ", column = ", j, ", value = ",x[i,j], sep=""))
+  }
+}
+```
+
+
+### while Loops
+
+```{r}
+count <- 0
+while(count<10){
+  print(paste("currentcount = ", count, ", next count = ", (count+1), sep=""))
+  count <- count+1 
+}
+```
+Preventing while loops resulting in an infinite loop
+
+```{r}
+z<- 5
+set.seed(1)
+while(z >= 3 && z <= 10) {
+        coin <- rbinom(1, 1, 0.5)
+        print(paste("coin = ", coin, sep=""))
+        if(coin == 1) {  ## random walk
+                z <- z + 1
+        } else {
+                z <- z - 1
+        } 
+}
+print(z)
+```
+
+## Functions
+
+```{r}
+f <- function(){
+  print("This is supposed to be an ampty function")
+}
+
+f()
+
+class(f)
+```
+
+
+```{r}
+ f <- function() {
+         cat("Hello, world!\n")
+ }
+f()
+```
+
+
+```{r}
+f <- function(num){
+  for (i in seq_len(num)){
+    cat("Current number = ", i, "Hello, world!\n")
+  }
+}
+
+f(5)
+```
+
+Last value of the function is the return value
+```{r}
+f <- function(num){
+  hello <- "Hello, world!\n"
+  for (i in seq_len(num)){
+    cat(i, hello)
+  }
+  
+  chars <- nchar(hello) * num
+  chars
+}
+meaningoflife <- f(5)
+print(meaningoflife)
+```
+
+Setting a default value to an argument in a function
+
+```{r}
+f <- function(num=1){
+  hello <- "Hello, world!\n"
+  for (i in seq_len(num)){
+    cat(i, hello)
+  }
+  
+  chars <- nchar(hello) * num
+  chars
+}
+meaningoflife <- f()
+print(meaningoflife)
+```
+
+### *** Obtaining the formal argument, the arguments included in the function definition
+
+```{r}
+formals(f)
+```
+
+```{r}
+f(num=2)
+```
+

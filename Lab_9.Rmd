@@ -301,3 +301,245 @@ Have two or more vowel-consonant pairs in a row.
 str_view(stringr::words, "([aeiou][^aeiou]){2,}", match = TRUE)
 ```
 
+## Grouping and References
+
+14. Capture a string  and refer to the same string as with back references like \1,\2
+
+eg: capture any four letters where third and fourth letters are similar to first and second letters
+
+```{r}
+str_view(fruit, "(..)\\1", match = TRUE)
+```
+
+### ***14.3.5.1 Exercises#
+
+Describe, in words, what these expressions will match:
+
+(.)\1\1-Detects same letter 3 times in a row of a string
+
+```{r}
+str_view("bbbaaajjjjj", "(.)\\1\\1", match = TRUE)
+```
+"(.)(.)\\2\\1" = matches 4 letters where second two letters are the inverse of the first two
+
+
+```{r}
+str_view(stringr::words, "(.)(.)\\2\\1", match = TRUE)
+```
+(..)\1- match four letters where first two letter are equal to last two letters
+
+```{r}
+str_view(fruit, "(..)\\1", match = TRUE)
+```
+
+"(.).\\1.\\1"- select five letters where 3rd and 5th equal to first letter
+
+```{r}
+str_view(stringr::words, "(.).\\1.\\1", match=TRUE)
+```
+
+"(.)(.)(.).*\\3\\2\\1"- match 7 plus letters where last three is inverse to first three letters
+
+```{r}
+str_view(stringr::words, "(.)(.)(.).*\\3\\2\\1", match=TRUE)
+```
+2. Construct regular expressions to match words that:
+
+Start and end with the same character.
+
+```{r}
+str_view(stringr::words, "^(.).*\\1$", match = TRUE)
+```
+
+
+Contain a repeated pair of letters (e.g. “church” contains “ch” repeated twice.)
+
+```{r}
+str_view(stringr::words, "(..).*\\1$", match = TRUE)
+```
+
+
+Contain one letter repeated in at least three places (e.g. “eleven” contains three “e”s.)
+
+```{r}
+str_view(stringr::words, "(.).*\\1.*\\1", match = TRUE)
+```
+
+## Tools
+### Detect matches
+
+15. Detecting a patteren in a string
+
+```{r}
+x <- c("apple", "banana", "pear")
+
+str_detect(string = x, pattern = "e")
+```
+
+How many common words start with t?
+
+```{r}
+sum(str_detect(words,"^t"))
+```
+
+What proportion of common words end with a vowel?
+
+```{r}
+mean(str_detect(words, "[aeiou]$"))
+```
+
+
+Find all words containing at least one vowel, and negate
+
+```{r}
+no_vowels_1 <- !str_detect(words, "[aeiou]")
+```
+
+
+Find all words consisting only of consonants (non-vowels)
+
+```{r}
+no_vowels_2 <- str_detect(words, "^[^aeiou]+$")
+```
+
+
+```{r}
+identical(no_vowels_1, no_vowels_2)
+```
+
+16. selecting elements that match a pattern
+
+```{r}
+words[str_detect(words, "x$")]
+```
+
+
+```{r}
+str_subset(words, "x$")
+```
+
+17. Extracting strings from a column of a data frame/tibble
+
+```{r}
+
+df <- tibble(
+  word =words,
+  i = seq_along(word)
+)
+
+
+df %>% filter(str_detect(word, "x$"))
+```
+18. Counting the number of matches
+
+```{r}
+x <- c("apple", "banana", "pear")
+
+str_count(x, "a")
+
+```
+
+On average how many vowels per word
+
+```{r}
+mean(str_count(words, "[aeiou]"))
+
+```
+
+
+
+```{r}
+df %>% 
+  mutate(vowels=str_count(word, "[aeiou]"),
+         consonants= str_count(word, "[^aeiou]"))
+```
+
+```{r}
+str_count("abababa", "aba")
+```
+
+```{r}
+str_view_all("abababa", "aba")
+```
+
+
+### 14.4.1.1 Exercises
+
+For each of the following challenges, try solving it by using both a single regular expression, and a combination of multiple str_detect() calls.
+
+Find all words that start or end with x.
+
+```{r}
+
+reg <- words[str_detect(words, "^x|x$")]
+
+
+starting_x <-str_detect(words, "^x")
+
+ending_x <- str_detect(words, "x$")
+
+sep_words <- words[starting_x|ending_x]
+
+identical(reg, sep_words)
+```
+
+
+Find all words that start with a vowel and end with a consonant.
+
+
+```{r}
+reg <-words[str_detect(words, "^[aeiou]|[^aeiou]$")]
+
+
+starting_vowel<- str_detect(words, "^[aeiou]")
+
+ending_cons <- str_detect(words, "[^aeiou]$")
+
+sep_words <- words[starting_vowel|ending_cons]
+
+identical(reg, sep_words)
+
+```
+
+
+Are there any words that contain at least one of each different vowel?
+
+```{r}
+
+sep_words<- str_detect(words, "[a]+[e]+[i]+[o]+[u]+")
+
+sep_words <-  str_detect(words, "[a]{1,}") &
+        str_detect(words, "[e]{1,}") &
+        str_detect(words, "[i]{1,}") &
+        str_detect(words, "[o]{1,}") &
+        str_detect(words, "[u]{1,}")
+
+
+
+
+
+identical(reg, sep_words)
+```
+
+
+
+What word has the highest number of vowels? 
+
+```{r}
+sum_lens<- str_count(words, "[aeiou]")
+
+words[which(sum_lens == max(sum_lens))]
+
+
+```
+
+
+What word has the highest proportion of vowels? (Hint: what is the denominator?)
+
+```{r}
+tot_len <- str_count(words, "")
+prop <- sum_lens/tot_len
+
+words[which(prop == max(prop))]
+```
+

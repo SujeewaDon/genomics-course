@@ -1,0 +1,16 @@
+---
+title: "Lab_10.Rmd"
+output: html_document
+---
+
+```{r}
+library(vcfR)
+```
+
+
+
+```{r}
+data(vcfR_example)
+vcf
+```
+

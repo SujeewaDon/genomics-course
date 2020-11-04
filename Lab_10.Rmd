@@ -7,6 +7,9 @@ Theme: readable
 ```{r, message=FALSE}
 library(vcfR)
 library(adegenet)
+library(reshape2)
+library(ggplot2)
+library(tidyverse)
 ```
 
 
@@ -260,6 +263,77 @@ head(chrom@var.info)
 ```{r}
 head(chrom@win.info)
 ```
+  9) Estimating genetic differentiation
   
+  Fst- Population differentiation.
+  Heterozygosity = the probability that 2 allelles randomly chosen from a population will be different
   
+```{r}
+data(vcfR_example)
+pop <- as.factor(c("us", "eu", "us", "af", "eu", "us", "mx", "eu", "eu", "sa", "mx", "sa", "us", "sa", "Pm
+ir", "us", "eu", "eu"))
+
+myDiff <- genetic_diff(vcf, pops = pop, method="nei")
+
+knitr::kable(head(myDiff[, 1:15]))
+```
   
+```{r}
+knitr::kable(head(myDiff[, 16:19]))
+```
+  
+```{r}
+knitr::kable(round(colMeans(myDiff[,c(3:9,16,19)], na.rm=TRUE), digits=3))
+```
+   summarizing data using violin plots
+   
+```{r}
+dpf <- melt(myDiff[,c(3:8,19)], varnames=c("Index", "Sample"), value.name = "Depth", na.rm = TRUE)
+
+p<- ggplot(dpf, aes(x=variable, y=Depth))+ geom_violin(fill="#2ca25f", adjust= 1.2)
+
+p <- p+
+  xlab("")+
+  ylab("")+
+  theme_bw()
+
+p
+
+```
+
+
+### ***Exercises Part II***
+
+1) You actually have everything you need to make a Manhattan plot. Can you figure out how to plot G′ST (y-axis) by genomic position (POS)?
+
+```{r}
+p <-myDiff %>% 
+  mutate(POS=as.numeric(POS)/1000) %>% 
+  filter(!is.na("Gprimest")) %>% 
+  ggplot(aes(x=POS, y=Gprimest))+
+  geom_point(colour="blue", alpha= 0.2)+
+  #geom_violin(fill="#2ca25f")+
+  labs(x="Genomic position (kb)", y="G prime ST")+
+  theme_classic()
+
+p
+```
+
+2) This Manhatttan plot shouldlook a bit unusual. Can you think of anything that may be wrong with this analysis?
+
+```{r}
+table(pop)
+```
+
+3) Can you figure out how to zoom in on a particular region of a chromosome in chromoqc()?
+
+```{r}
+chromoqc(chrom=chrom, dp.alpha = 66, xlim = c(2*10^5, 4*10^5))
+```
+
+4) Can you use the function queryMETA() to look for other data in your file that may be of interest?
+
+```{r}
+queryMETA(vcf, element = "INFO=<ID=MQRankSum")
+```
+

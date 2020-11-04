@@ -1,10 +1,12 @@
 ---
-title: "Lab_10.Rmd"
+title: "Population genomics based on highthroughput sequencing (HTS)"
 output: html_document
+Theme: readable
 ---
 
-```{r}
+```{r, message=FALSE}
 library(vcfR)
+library(adegenet)
 ```
 
 
@@ -14,3 +16,250 @@ data(vcfR_example)
 vcf
 ```
 
+## Meta Region
+
+1. Viewing the mta region
+```{r}
+strwrap(vcf@meta[1:7])
+
+```
+2. Summarizing the meta information
+
+  a) Summarizing all information
+  
+```{r}
+queryMETA(vcf)
+```
+
+  b) Summarizing information for a particular element
+```{r}
+queryMETA(vcf, element= "DP")
+```
+
+  c) Summarizing information for a particular acronym of a particular element
+```{r}
+queryMETA(vcf, element = "FORMAT=<ID=DP")
+```
+
+## Fix region
+
+Getting information about fix region containing information about each variant
+
+```{r}
+head(getFIX(vcf))
+```
+
+## The gt region
+
+```{r}
+vcf@gt[1:6, 1:4]
+```
+
+
+## Reading the vcfR file
+
+```{r}
+vcf <- read.vcfR("data/pinfsc50_filtered.vcf.gz")
+
+head(vcf)
+```
+
+
+## Writing vcf file
+
+```{r}
+write.vcf(vcf, "data/myVCFdata_filtered.vcf.gz")
+```
+
+
+## Exercise Part I
+
+1. How would we 􀃝nd more information about
+read.vcfR()
+?
+```{r}
+?read.vcfR
+```
+
+2. How would we learn what the acronym “AD” stands for?
+
+```{r}
+queryMETA(x=vcf, element = "AD")
+```
+
+3. We used the head() function to view the first few lines of fix data. How would we view the last few lines of fix data?
+
+```{r}
+tail(getFIX(vcf))
+```
+
+4) There is a column in the fix portion of the data called QUAL. It is not defined in the meta portion of the data because it is defined in the VCF specification. It stands for ‘quality’. Does QUAL appear useful to us? Why or why not?
+
+```{r}
+head(data.frame(vcf@fix),5)
+
+print("'QUAL' column is useful as it says the quality of each variant over all samples")
+```
+
+5) How would we query the sample names?
+
+```{r}
+colnames(vcf@gt)[colnames(vcf@gt) != "FORMAT"]
+```
+
+
+
+# Analysis of genomic data
+
+1) Reading the vcfR file
+
+```{r}
+#library(vcfR)
+vcf <- read.vcfR("data/pinfsc50_filtered.vcf.gz")
+vcf
+```
+
+2) Converting VCF data to genlight object
+
+```{r}
+x <-  vcfR2genind(vcf)
+x
+```
+
+3) Viewing the genotypes stored
+
+### ***vcfR format*** 
+```{r}
+gt <- extract.gt(vcf, element = "GT")
+
+gt[c(2,6,18), 1:3]
+
+```
+
+### ***genlight format***
+
+```{r}
+t(as.matrix(x))[c(1,5,17), 1:3]
+```
+
+4) Setting population data for genlight object
+```{r}
+pop(x) <- as.factor(c("us", "eu", "us", "af", "eu", "us", "mx", "eu", "eu", "sa", "mx", "sa", "us", "sa",
+"Pmir", "us", "eu", "eu"))
+
+popNames(x)
+```
+
+5) Setting the ploidy of all samples in genelight object to same ploidy
+
+```{r}
+ploidy(x) <- 2
+```
+
+
+6) Generating distance matrices
+
+```{r}
+x.dist <- dist(x)
+```
+
+Generating distance matrices using poppr package
+
+```{r}
+#library(poppr)
+#x.dist <- poppr::bitwise.dist(x)
+```
+
+7) Locate unusual features in a genome chromR
+  
+  a)
+```{r}
+
+# Find the files
+
+vcf_file <- system.file("extdata", "pinf_sc50.vcf.gz", package = "pinfsc50")
+
+dna_file <- system.file("extdata", "pinf_sc50.fasta", package= "pinfsc50")
+
+gff_file <- system.file("extdata", "pinf_sc50.gff", package = "pinfsc50")
+
+
+
+# Input the files
+
+vcf <- read.vcfR(vcf_file, verbose = FALSE)
+
+dna <- ape::read.dna(dna_file, format = "fasta")
+
+gff <- read.table(gff_file, sep="\t", quote ="")
+
+
+# Create a chromR object
+
+chrom <- create.chromR(name= "Supercontig", vcf = vcf, seq = dna, ann = gff, verbose = TRUE)
+
+chrom
+```
+  
+  b) Plot chromR object
+  
+```{r}
+plot(chrom)
+```
+  read depth = sum over all samples
+  Quality = quality of variants
+  
+  
+  c) Plot a chromo plot- displays the samo information as first plot but it distributes the data along its chromosomal coordinates
+```{r}
+chromoqc(chrom, dp.alpha = 66)
+```
+  
+
+  d) Processing chromR objects
+  
+  Plotting densities using plot function
+```{r}
+chrom <- proc.chromR(chrom, verbose = TRUE)
+```
+  
+```{r}
+plot(chrom)
+```
+  
+  e) Plotting chromoqc plot with variant densities, nucleotide content and where in the reference nucleotides (A,C,GT are)
+  
+```{r}
+chromoqc(chrom, dp.alpha = 66)
+```
+  
+  
+```{r}
+vcf <- read.vcfR("data/pinfsc50_filtered.vcf.gz", verbose = FALSE)
+
+chrom <- create.chromR(name= "Supercontig", vcf=vcf, seq = dna, ann=gff, verbose = FALSE)
+
+chrom <- proc.chromR(chrom, verbose = FALSE)
+chromoqc(chrom, dp.alpha = 66)
+```
+  read depth in this plot is uniform, lacks large variation.
+  mapping quality is relatively constant, variants with low mapping quality is omitted.
+  
+  
+8) Tabular summaries
+
+  a) Summaries based on per variants basis.
+  Includes sample size (minus missing data), allele counts, heterozygosity, effective size
+```{r}
+head(chrom@var.info)
+```
+
+  b) Summaries based on per windows.
+  Includes nucleotide content, genic sites and the number of variants per window (including missing data)
+  
+```{r}
+head(chrom@win.info)
+```
+  
+  
+  

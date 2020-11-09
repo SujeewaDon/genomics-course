@@ -1,0 +1,83 @@
+---
+title: "Microbiome Analysis using data2 and phyloseq"
+output: html_document
+theme: readable
+---
+
+
+```{r, message=FALSE}
+library(phyloseq)
+library(dada2)
+library(DECIPHER)
+```
+
+
+```{r}
+path <- "data/miseqsopdata/MiSeq_SOP"
+list.files(path)
+```
+1) Read the names of the FAST sequences. 
+  
+  a) Getting a list of forward fastq files
+
+```{r}
+fnFs <- sort(list.files(path, pattern = "_R1_001.fastq", full.names = TRUE))
+```
+
+  b) Getting a list of reverse fastq files
+  
+```{r}
+fnRs <- sort(list.files(path, pattern = "_R2_001.fastq", full.names = TRUE))
+```
+  
+  c) Extract sample names
+```{r}
+sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
+```
+  
+
+2) Inspect read quality profile
+
+  a) Quality profile of the forward reads
+
+```{r}
+plotQualityProfile(fnFs[1:2])
+```
+
+  grey-scale heat map - the frequency of each quality score at each base position
+  
+  green line - mean quality score
+  
+  orange line - quartile of the quality score
+   red line - scaled proportion of reads that extends to at least that position 
+   
+   
+   b) Quality profile of the reverse reads
+   
+```{r}
+plotQualityProfile(fnRs[1:2])
+```
+   
+   We have to truncate the reads where quality distribution crashes (eg: position 160 in reverse reads)
+ 
+3) Filtering ang triming
+
+```{r}
+filtFs <- file.path(path, "filtered", paste(sample.names, "_F_filt.fastq.gz"))
+
+filtRs <- file.path(path, "filtered", paste(sample.names, "_R_filt.fastq.gz"))
+
+names(filtFs) <- sample.names
+
+names(filtRs) <- sample.names
+
+
+out <-  filterAndTrim(fnFs, filtFs, fnRs, filtRs,
+                      truncLen =c(240,160),
+ maxN = 0,
+ maxEE = c(2,2),
+ truncQ = 2,
+ rm.phix = TRUE,
+ compress = TRUE,
+ multithread = TRUE)
+```

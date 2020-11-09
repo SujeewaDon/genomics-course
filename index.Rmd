@@ -30,5 +30,6 @@ knitr::opts_chunk$set(echo = TRUE)
  14. [Lab-9](Lab_9.html)
  15. [Lab-9 Extra](Lab_9_Extra.html)
  16. [Lab-10](Lab_10.html)
+ 17. [Lab-11](Lab_11.html)
  
   

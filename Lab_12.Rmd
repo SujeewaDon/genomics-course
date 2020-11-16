@@ -63,7 +63,7 @@ lockNodeDimensions(FALSE, style.name)
 
 4) Adding node attributes
 
-```{r}
+```{r, eval=FALSE}
  g = new ('graphNEL', edgemode='directed')
     g = graph::addNode ('A', g)
     g = graph::addNode ('D', g)
@@ -89,7 +89,7 @@ setNodeFontSizeDefault (30)
 ```
  ![](Images/Lab_12_4.jpeg)
 
-```{r}
+```{r, eval=FALSE}
 
 getNodeShapes ()   # diamond, ellipse, trapezoid, triangle, etc.
     column <- 'moleculeType'
@@ -108,7 +108,7 @@ getNodeShapes ()   # diamond, ellipse, trapezoid, triangle, etc.
  
  
  
-```{r}
+```{r, eval=FALSE}
 
  control.points <- c (-2.0, 0.0, 2.0)
 colors <-  c ('#2255CC', '#5588DD', '#FFFFFF', '#DD8855','#CC5522')
@@ -117,7 +117,7 @@ colors <-  c ('#2255CC', '#5588DD', '#FFFFFF', '#DD8855','#CC5522')
  
  
 
-```{r}
+```{r, eval=FALSE}
 control.points = c (-3.0, 2.0, 3.0)
     sizes     = c (20, 80, 90)
     setNodeSizeMapping (column, control.points, sizes)
@@ -125,24 +125,24 @@ control.points = c (-3.0, 2.0, 3.0)
 
  ![](Images/Lab_12_6.jpeg)
  6) Selecting nodes
-```{r}
+```{r, eval=FALSE}
 selectNodes ('C','name')
 getSelectedNodes ()
 ```
 ![](Images/Lab_12_7.jpeg)
  a) Show first neighbour of the nodes
  
-```{r}
+```{r, eval=FALSE}
 selectFirstNeighbors ()
 ```
  ![](Images/Lab_12_8.jpeg)
  
-```{r}
+```{r, eval=FALSE}
 node.names <- getSelectedNodes ()
 node.names
 ```
  
-```{r}
+```{r, eval=FALSE}
  clearSelection()
   ?clearSelection
 ```
@@ -150,13 +150,13 @@ node.names
  7) Saving and export
  
   a) SAve everything
-```{r}
+```{r, eval=FALSE}
  saveSession('vignette_session')
 ```
  
   b) Save high resolution iage files
   
-```{r}
+```{r, eval=FALSE}
 full.path=paste(getwd(),'vignette_image',sep='/')
     exportImage(full.path, 'PNG', zoom=200) #.png scaled by 200%
     exportImage(full.path, 'PDF') #.pdf
